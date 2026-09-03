@@ -1,0 +1,8 @@
+# indicate this is the root of the project
+root = true
+
+[*]
+trim_trailing_whitespace = true
+insert_final_newline = true
+# Finally, having a default of UTF-8 *without* BOM got fixed in VS2017 15.3
+charset = utf-8

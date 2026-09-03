@@ -1,0 +1,780 @@
+﻿o Version 4.7 - Legacy (2026.09.03)
+    Nothing ever happens
+    Except, I happened
+
+o Version 4.7 (2025.04.09)
+    Add a mechanism to detect and download updated DBXs from the official UEFI repository
+    Add ztsd compression support for disk images
+    Add a new exclusion feature in the settings, to ignore disks with a specific GPT GUID
+    Improve detection for compressed VHD images that are too large to fit the target drive
+    Fix commandline hogger not being deleted when running Rufus from a different directory
+    Fix FAT filenames from embedded images being potentially truncated on image extraction
+    Fix a side-loading vulnerability [CVE-2025-26624] with cfgmgr32.dll (with thanks to @EmperialX)
+    Fix UI memory leaks (courtesy of @ozone10)
+    Fall back to user/system default locale when getting error description (courtesy of @Wack0)
+    Don't run the commandline hogger on POSIX shells
+    Drop ARM 32-bit builds (Note that ARM 64-bit builds are *NOT* affected by this)
+    Update FreeDOS and Grub4DOS to latest
+
+o Version 4.6 (2024.10.21)
+    Add a new setup.exe wrapper to bypass Windows 11 24H2 in-place upgrade restrictions
+    Add TimeZone to regional options replication
+    Set local account passwords to not expire by default
+    Fix an error when trying to write compressed VHD images
+    Fix an error when invoking Rufus from the PowerShell commandline
+    Improve revoked UEFI bootloaders check to support Linux SBAT, Windows SVN and cert DBX
+    Improve support for ReactOS boot media
+  
+o Version 4.5 (2024.05.22)
+    Add new advanced option to perform runtime UEFI media validation of suitable images (Windows, most Linux)
+    Move the 'Use Rufus MBR' advanced option to a cheat mode (Alt-A)
+    Fix truncation of VHDX images, as well as a benign error message when writing VHD/VHDX
+    Fix support for Linux persistence in some configurations (Mint, Ubuntu 24.04)
+    Fix multiple potential vulnerabilities (with thanks to Mansour Gashasbi)
+    Update internal GRUB to version 2.12
+    Update UEFI:NTFS to latest (now always uses the ntfs-3g driver, rather than the buggy AMI NTFS one)
+    Increase buffer size when copying ISO files, in an attempt to minimize the AMI NTFS UEFI driver bug
+    Improve partition creation handling
+    Don't display the WUE dialog when a conflicting 'unattend.xml' already exists
+
+o Version 4.4 (2024.01.17)
+    Add workaround for distros that use broken symbolic links as their UEFI bootloaders (such as Mint 21.3)
+    Add support for GRUB 2.12
+    Fix a crash when saving .ffu images
+    Fix UEFI:NTFS partition not being added, in MBR mode, for some Linux ISOs
+    Prevent Microsoft Dev Drives from being listed
+    Improve support for SDXC card readers
+    Improve Large FAT32 formatting by aligning start of data regions to 1 MB (courtesy of Fred)
+
+o Version 4.3 (2023.10.19)
+    Add support for Rock Ridge symbolic links preservation when NTFS is used
+    Add an exception to enforce NTFS for Linux Mint's LMDE
+    Add an expert feature to restrict a Windows installation to S Mode
+    Fix persistence support for Debian 12 when booted in BIOS mode
+    Fix a regression that prevented the opening of .vhd images
+    Update UEFI:NTFS to report a more explicit error on bootmgr security issues
+    Improve the search for conflicting processes by running it in a background thread
+    Improve support for Slax Linux
+
+o Version 4.2 (2023.07.26)
+    Add detection and warning for UEFI revoked bootloaders (including ones revoked through SkuSiPolicy.p7b)
+    Add ZIP64 support, to extract .zip images that are larger than 4 GB
+    Add saving and restoring current drive to/from compressed VHDX image
+    Add saving and restoring current drive to/from compressed FFU (Full Flash Update) image [EXPERIMENTAL]
+    Fix a crash when trying to open Windows ISOs, with the MinGW compiled x86 32-bit version
+    Fix an issue where ISOs that contain a boot image with an 'EFI' label are not detected as bootable
+    Increase the ISO → ESP limit for Debian 12 netinst images
+    Ensure that the main partition size is aligned to the cluster size
+
+o Version 4.1 (2023.05.31)
+    Add timeouts on enumeration queries that may stall on some systems
+    Restore MS-DOS drive creation through the download of binaries from Microsoft
+    Update the log button icon
+    Fix UEFI:NTFS incompatibility with Windows Dev Kit 2023 platform
+    Fix more GRUB 'out of range pointer' errors with Ubuntu/Fedora when booting in BIOS mode
+
+o Version 4.0 (2023.04.26)
+    Fix persistent partition not working with Ubuntu 23.04
+    Fix out of range pointer error with Ubuntu 23.04 when booting in BIOS mode
+    Fix boot freeze with Ubuntu Studio when Secure Boot is enabled
+    Fix incorrect architecture detection when checking for updates
+    Fix a Windows Store application crash when processing GRUB bootloaders
+    Fix a Windows Store application crash when enumerating processes that contain a % sign
+    Fix a Windows Store application crash when using German localization
+    Note that the major version was bumped on account of:
+      - New versions of Rufus requiring Windows 8 or later
+      - New versions of Rufus defaulting to a 64-bit executable
+      - Old versions of Rufus potentially not being able to update properly
+
+o Version 3.22 (2023.03.25)
+    Add SHA-1 and SHA-256 x86 acceleration on CPUs that support it (courtesy of Jeffrey Walton)
+    Add an option to disable BitLocker device encryption in the Windows User Experience dialog
+    Add a cheat mode (Ctrl-P) to preserve the log between sessions
+    Fix potential media creation errors by forcing the unmount of stale WIM images
+    Fix potential access errors in ISO → ESP mode by forcing Large FAT32 formatting
+    Fix user-specified label not being preserved on error/cancel
+    Fix some large SSD devices being listed by default
+    Fix processing of Rock Ridge CE fields
+    Work around the use of Rock Ridge symbolic links for Linux firmware packages (Debian)
+    Remove the ISO download feature on Windows 7
+    Note: This is the last version of Rufus that can run on Windows 7
+
+o Version 3.21 (2022.11.28)
+    Allow the provision of an arbitrary local account username in the Windows User Experience dialog
+    Improve Windows version reporting from ISO/.wim
+    Update UEFI:NTFS' NTFS drivers to v1.4 and exFAT drivers to v1.9
+    Switch to remote download for nonstandard GRUB (Fedora 37, openSUSE Live, GeckoLinux)
+    Fix UEFI:NTFS partition not being set in MBR mode for ISOs with a >4GB file (UwUntu)
+    Fix GRUB support for Arch and derivatives, when a non FAT compliant label is used
+    Fix incorrect detection of GRUB with nonstandard prefixes
+    Fix tab order not working on the Windows User Experience dialog
+
+o Version 3.20 (2022.08.03)
+    Enable applicable Windows User Experience options for Windows 10
+    Remember last Windows User Experience selection between sessions
+    Add automatic local account creation and regional options duplication
+    (NB: This is limited to creating an account with the same name as the current user and
+     with an empty password that the user will be prompted to change after first reboot)
+    Add a workaround for ISOs that have a 'syslinux' symbolic link to '/isolinux/' (Knoppix)
+    Revert to offline insertion of registry keys for the TPM/SB/RAM bypass where possible
+    Remove storage bypass, since this is a bogus bypass that doesn't do anything
+    Improve BIOS compatibility when displaying the "UEFI boot only" alert message
+    Fix Windows User Experience dialog appearing twice for Windows To Go
+    Fix Windows User Experience options not being applied for ARM64
+    Fix Microsoft Account bypass not being applied unless TPM/SB/RAM bypass is selected
+    Fix overeager detection of GRUB2 bootloaders with nonstandard prefixes
+
+o Version 3.19 (2022.07.01)
+    Add a new selection dialog for Windows 11 setup customization:
+      - Secure Boot and TPM bypass have now been moved to this dialog
+      - Also allows to bypass the mandatory requirement for a Microsoft account on Windows 11 22H2
+        (NB: Network *MUST* be temporarily disabled for the local account creation to be proposed)
+      - Also add an option to skip all collection questions (Sets all answers to "Don't allow")
+      - Also add an option for setting internal drives offline for Windows To Go
+      Note: These customization options are only proposed when using a Windows 11 image.
+    Add support for distros using a nonstandard GRUB 2.0 prefix directory (openSUSE Live, GeckoLinux)
+    Add the ability to ignore USBs (See https://github.com/pbatard/rufus/blob/master/res/rufus.ini)
+    Change drive listing to always list in increasing order of size
+    Update exceptions needed by Red Hat and derivatives for the 9.x releases
+    Update UEFI:NTFS drivers to latest
+    Reassign a letter for drives written in DD mode that don't have an ESP (e.g. CoreELEC)
+    Fix Windows refusing to mount Linux MBR partitions on FIXED drives
+    Fix support for multiextent files when Joliet is in use
+
+o Version 3.18 (2022.03.11)
+    Fix DLL sideloading vulnerabilities
+    Fix ISO → ESP creation when running on Windows 11
+    Fix an issue when detecting network connectivity when the DHCP service is disabled
+    Update FreeDOS to version 1.3
+    Add bypass of Windows 11 restrictions for in-place upgrades
+    Add Miracle Linux 8 to the list of Red Hat exceptions
+    Other internal fixes and improvements
+
+o Version 3.17 (2021.10.23) [BUGFIX RELEASE]
+    Fix MBR not being properly cleared
+    Fix commandline hogger not being deleted on exit
+    Improve ReFS handling for platforms that support it
+    Update UEFI:NTFS to latest and remove Secure Boot notice since this version is Secure Boot signed
+    Update Grub4DOS to latest
+
+o Version 3.16 (2021.10.13)
+    Fix ISO mode support for Red Hat 8.2+ and derivatives
+    Fix BIOS boot support for Arch derivatives
+    Fix removal of some boot entries for Ubuntu derivatives
+    Fix log not being saved on exit
+    Add Windows 11 "Extended" installation support (Disables TPM/Secure Boot requirements)
+    Add UEFI Shell ISO downloads
+    Add support for Intel NUC card readers
+    Improve Windows 11 support
+    Improve Windows version reporting
+    Speed up clearing of MBR/GPT
+
+o Version 3.15 (2021.08.03)
+    Update GRUB to version 2.06
+    Add support for .vtsi files (Ventoy Sparse Image, courtesy of longpanda/ventoy)
+    Add workaround for openSUSE Live ISOs
+    Move default app directory to %LocalAppData%\Rufus\ and always save a log there on exit
+    Fix AppStore version of Rufus not being able to store downloaded files
+    Fix failure to open Syslinux/GRUB files when Rufus is located at the root of a drive
+    Prevent the creation of 'System Volume Information' on ESPs written in DD mode
+    Prevent drive letter assignation to the UEFI:NTFS partition
+    Prevent persistent partition creation errors due to size
+    Enhance safety checks before running the Fido ISO download script
+    Other internal fixes and improvements
+
+o Version 3.14 (2021.04.30)
+    Improve DD write speed (uncompressed images only)
+    Improve checksum computation speed
+    Improve network connectivity detection
+    Only prompt for additional GRUB/Syslinux downloads when not writing in DD mode
+    Fix potential "loss" of disk after writing Ubuntu 20.10 in DD mode
+    Fix GRUB compatibility issue with Ubuntu 21.04
+    Fix Rufus MBR not being selected by default for Windows ISOs
+    Fix drag and drop being enabled during drive creation
+    Add more "exceptions" for forced DD image writing
+
+o Version 3.13 (2020.11.20)
+    Add a cheat mode (Alt-M) to accept disk images without a Boot Marker
+    Add marquee operation progress to the taskbar icon
+    Add zeroing/image writing progress to the log
+    Switch to using 0x55 and 0xAA instead of 0x00 and 0xFF for low pass badblock check
+    Switch to using fake/manufacturer units when computing the default label
+    Fix overnumerous write retries on error when writing a disk image
+    Work around Windows' abysmal handling of removable drives that contain an ESP
+    Improve mounting/unmounting of volumes
+    Update UEFI:NTFS file system drivers to version 1.7
+    Other internal fixes and improvements (VDS, error reporting, etc.)
+
+o Version 3.12 (2020.10.14)
+    Add optional SHA-512 digest algorithm (Alt-H)
+    Add a cheat mode (Alt +/-) to increase/decrease application priority
+    Enable direct provision of install.wim/install.esd for Windows To Go
+    Move Windows To Go ESP to the beginning of the drive, on systems that allow it
+    Enforce a minimum volume size of 256 MB for ext2/ext3 partitions
+    Speed up the scanning of ISOs with lots of Rock Ridge deep directory entries
+    Fix detection of GRUB version and update embedded GRUB for Ubuntu 20.10 support
+    Fix user interface labels for accessibility
+    Work around a Windows bug where the wrong drive letter may be returned
+
+o Version 3.11 (2020.06.18)
+    Add Rock Ridge deep directory support
+    Add an option to write small ISOs to an ESP (GPT only)
+    Add a cheat mode (Ctrl-SELECT) to extract content from an additional zip archive on top of the ISO
+    Add a cheat mode (Alt-G) to disable Virtual Hard Disk listing
+    Add a cheat mode (Alt-P) to toggle a GPT ESP to Basic Data (Windows 10 only)
+    Fix improper x86 32-bit NTFS driver being used for UEFI:NTFS
+    Improve UEFI:NTFS compatibility with older UEFI firmwares
+    Improve startup time by running the ISO download feature check in the background
+    Remove Ubuntu's splash screen for persistent UEFI drives
+    Enable ASLR for the Rufus executable
+
+o Version 3.10 (2020.04.22)
+    Improve support for Ubuntu 20.04
+    Improve detection of FIXED drives with no mounted partitions
+    Improve extfs formatting (courtesy of Marcos Mello)
+    Update UEFI:NTFS file system drivers to v1.5
+    Fix progress not being updated when using the German localization
+    Fix primary GPT being overwritten when adding the protective MBR message
+    Fix a regression with lousy security solutions that prevent the creation of an 'autorun.inf'
+    Fix an assert during FreeDOS drive creation when the Windows system locale is set to UTF-8
+    Fix invalid label errors when using a non-Western locale
+
+o Version 3.9 (2020.02.29)
+    Add exFAT support when creating blank UEFI:NTFS drives [EXPERIMENTAL]
+    Fix ext2/ext3 corruption for partitions larger than 4 GB
+    Fix early boot files not being usable on compressed NTFS partitions
+    Fix writing of compressed streams that don't end on sector boundary
+    Fix percent not being displayed on slow format
+    Improve file preallocation and speed up ISO extraction (courtesy of Mattiwatti)
+    Improve ext2/ext3 formatting speed
+    Improve protective MBR message for GPT partitioned drives
+    Improve reporting of Syslinux/GRUB download errors
+    Improve reporting of partition types and of Windows' version
+    Report the usage of UDF symbolic links
+    Update embedded Syslinux to 6.04-pre1
+
+o Version 3.8 (2019.09.16) [BUGFIX RELEASE]
+    Fix regression where some ISOs (Debian) would produce a Syslinux error when booted in BIOS mode
+    Fix potential 0xC0030057 errors when trying to create a persistent partitions on a non-FIXED drive
+
+o Version 3.7 (2019.09.09)
+    Finalize persistent partition support for Debian and Ubuntu [EXPERIMENTAL]:
+    - Debian with persistence should work out of the box with any recent "Debian Live" ISO.
+    - Ubuntu with persistence should also work *IF* using a post 2019.08.01 ISO. Note that,
+      because of bug #1489855, trying to use persistence with Ubuntu ISOs that were released
+      before August 2019 will only result in rescue mode during boot - You have been warned!
+    - Other distros may work with persistence as long as they use a Debian-like or Ubuntu-like
+      method, and, in the case of Ubuntu-like, if they use casper with the #1489855 bugfix.
+    - Persistence and ext formatting support should still be considered EXPERIMENTAL at this stage.
+    Add cheat mode (<Alt>) to switch between percent/speed/ETA on *some* operations [EXPERIMENTAL]
+    Report SuperSpeed+ devices in the log (Come on USB-IF, just add "Ludicrous Speed" already!)
+    Fix UI checkboxes (Extended label, Fixes for old BIOSes) being cleared on START
+    Fix "Can't mount GUID volume" regression when creating Windows To Go drives
+    Fix "Volume label is invalid" error with empty labels on Windows 7
+    Fix stale progress bar during standalone ext2/ext3 formatting
+    Fix an extraction failure with R-Drive Image bootable ISOs
+    Disable ISO mode for Pop_OS
+    Other cosmetic and internal improvements
+
+o Version 3.6 (2019.07.18)
+    Add support for persistent partitions [EXPERIMENTAL]
+    (Note: The above won't work with Ubuntu until Ubuntu bug #1489855 is properly fixed)
+    Add a mode to use VDS when partitioning/formatting (Alt-V) [EXPERIMENTAL]
+    Add full extraction support for efi.img (Solus)
+    Fix listing of potentially blocking processes
+    Fix NTFS not being selectable when using Grub4DOS
+    Fix download script not being launched when the user name contains a space
+    Fix translated messages potentially being truncated (e.g. Thai)
+    Fix progress bar report for screen readers (Accessibility issue)
+    Fix a regression where Windows format prompts would not be suppressed
+    Improve(?) Windows To Go support by following Microsoft's recommended partition order
+    Don't enumerate Windows Sandbox VHDs
+    Disable ISO mode when Manjaro ISOHybrids are being used
+    Update embedded GRUB to version 2.04
+
+o Version 3.5 (2019.03.28)
+    Add a feature to download official retail Windows 8.1 or Windows 10 ISOs
+    (Note: 'Check for updates' must be enabled for the above to be active)
+    Add Windows To Go support for MCT generated Windows ISOs
+    Add a notice about the 'WppRecorder.sys' Microsoft bug for Windows 10 1809 ISOs
+    Add a notice about trying to format a drive larger than 2 TB in MBR mode
+    Add a notice about Legacy boot when trying to boot UEFI-only media in Legacy mode
+    Report the full PID and command line of potentially blocking processes in the log
+    Fix a potential silent abort when the drive is in use
+    Fix 'Quick Format' option always being activated
+    Fix potential change of the selected file system after an ISO has been loaded
+    Fix Win7 x64 EFI bootloader not being extracted in dual BIOS+UEFI mode (Alt-E)
+
+o Version 3.4 (2018.12.05)
+    Set the default image selection directory to Downloads\ instead of My Documents\
+    Add ARM/ARM64 automatic update support
+    Improve UEFI:NTFS compatibility
+    Improve access issues by using VDS to delete all partitions
+    Update the .appx to include all architectures as well as request elevation
+    Fix broken detection of some EFI based images
+    Fix broken update check due to server switch
+    UI and accessibility fixes and improvements
+
+o Version 3.3 (2018.09.17) [BUGFIX RELEASE]
+    Fix a regression when processing uncompressed bootable DD images
+    Fix Windows To Go drive creation for ARM64 Windows ISOs
+
+o Version 3.2 (2018.09.11)
+    Add RSA-2048 signature validation on all the server downloads
+    Add "Fast zeroing" cheat mode (courtesy of René van der Zee)
+    Add support for XP/Server 2003 x64 ISOs (courtesy of Mattiwatti)
+    Improve ISO extraction performance by preallocating files (courtesy of Mattiwatti)
+    Improve bad blocks check algorithm (from suggestions by AL.Skywalker)
+    Fix progress not being displayed for Syslinux or GRUB downloads
+    Fix unwanted application close when cancelling an image scan
+    Fix an issue where FAT32 could still be selected for ISOs containing a >4GB file
+
+o Version 3.1 (2018.06.19)
+    Fix extraction of ISO content for GRUB based ISOs (Manjaro, Kaspersky, etc.)
+    Fix text being truncated on some dialogs (mostly Russian and Thai)
+    Add detection & warning about the 'Controlled Folder Access' Windows 10 feature
+    Improve retry attempts for transient errors
+    Increase size of the ESP to 300MB, for Windows To Go drives partitioned as GPT
+    Update GRUB 2.0 and Grub4DOS to latest
+    Update libcdio to latest
+
+o Version 3.0 (2018.05.29)
+    UI redesign to follow the flow of user operations (with thanks to Fahad Al-Riyami for the concept)
+    Drop XP and Vista platform support
+    Switch all downloads to SSL and use https://rufus.ie as the new base URL
+    Add ARM64 support for UEFI:NTFS
+    Fix delays when querying floppy drives during device enumeration
+    Improve support of efi.img files on Linux ISOs
+    Improve support for non-ISO9660 compliant openSUSE Leap ISOs
+    Improve translation support and remove manual positioning
+    Internal fixes and improvements
+
+o Version 2.18 (2017.11.07)
+    Ensure that the same drive is reselected on device refresh
+    Add a cheat mode to cycle the USB port of currently selected device
+    Make lookup for updatable .cfg file more generic (e.g. ESET SysRescue)
+    Fix handling of multiextent ISOs (e.g. BlackArch Linux)
+    Fix propagation of image decompression errors
+    Update grub4dos to latest
+
+    IMPORTANT: THIS IS THE LAST RELEASE TO SUPPORT WINDOWS XP AND WINDOWS VISTA
+    SUBSEQUENT RUFUS RELEASES ARE *NO LONGER* COMPATIBLE WITH THESE PLATFORMS
+
+o Version 2.17 (2017.09.12)
+    Add support for Debian 9 live ISOs in UEFI mode
+    Add support for Super Floppy Disk "partitioning" mode
+    Add support for more non-USB card readers
+    Strengthen download update checks, to prevent attack scenarios that leverage user unawareness
+    Fix an issue with Spanish translation prompts not displaying properly
+    Fix an issue with Windows To Go support on some non-official Windows ISOs
+    Fix an issue with log autoscrolling
+    Fix an issue when using A: or B: as drive letters
+
+o Version 2.16 (2017.07.31)
+    Add an audiovisual cue on completion/error
+    Add a workaround for ISOs using nonstandard Rock Ridge extensions (looking at you Kali Linux!)
+    Notify user when an ISO is broken or truncated
+    Notify user if other processes are accessing the drive before format
+    List processes that are locking a drive on failure
+    Improve verbosity of the Windows To Go process
+    Other fixes and improvements
+
+o Version 2.15 (2017.05.17)
+    Fix non-listing of drives that are opened for write access by another process
+    Report external processes that may be preventing disk access (in the log)
+    Improve Windows To Go support for Windows 10 Creators Update
+    Don't report an error on checkdisk failure
+    Update GRUB 2.0 and Grub4DOS to latest
+    Other fixes and improvements
+
+o Version 2.14 (2017.04.10) [BUGFIX RELEASE]
+    Fix inability to create BIOS-bootable drives, in some circumstances, due to write sharing permissions
+
+o Version 2.13 (2017.04.06)
+    Preserve 'GPT for UEFI' option if the user changed it before selecting an ISO
+    Fix unwanted notification sound when closing with the X button (#893)
+    Fix inability to restore the minimized application after a popup is displayed (#896)
+    Fix an issue when trying to install Syslinux/NTFS twice in a row (#904)
+    Work around Microsoft's inconsistent casing of device IDs during device enumeration
+    Work around Microsoft's aggressive locking of partitions in Windows 10 Creators Update (#883)
+    Restrict write sharing permissions when accessing a device
+    Update libcdio and GRUB 2.0 to latest
+
+o Version 2.12 (2017.01.27)
+    Add Hebrew translation, courtesy of NSBuilder and פלוני אלמוני
+    Add a cheat mode (Alt-O) to create an ISO from the first optical media found
+    Enable target system selection for Windows To Go
+    Enable NTFS selection for Syslinux 6.x (EXPERIMENTAL)
+    Fix an issue that allowed BIOS target selection with pure UEFI images
+    Fix license display for RTL languages
+    Update Grub4DOS and FreeDOS to latest
+    Additional fixes and improvements
+
+o Version 2.11 (2016.09.08)
+    Do not download BIOS related files unless BIOS boot is selected
+    Improve support for Arch Linux derivatives
+    Add a cheat mode to disable drive indexing (Alt-Q) on format
+    Fix handling of 'Super Floppy Disk' formatted drives
+    Fix handling of misleading short write reports, for drives larger than 1 TB
+    Fix an issue that enabled FAT32 file system selection on some Windows images
+    Fix broken UI font for XP users
+    Fix sanitizing of exFAT labels
+
+o Version 2.10 (2016.07.20)
+    Add SHA-256 validation for downloaded files. You will now see an ✓ or ✗ in the log for relevant content
+    Add support for O2Micro PCI-E card readers
+    Add compressed NTFS support for UEFI:NTFS
+    Improve automatic closure of the Windows default format prompt
+    Improve support for Ubuntu (silence a benign warning), Springdale (use the actual label) and Antergos (Syslinux version detection)
+    Work around a Windows bug that can render a GPT disk inaccessible after cleanup (e.g. ChromeOS image)
+    Fix hash computation for content that isn't a multiple of 64 bytes (NB: This did not affect ISOs)
+    Fix Syslinux installation on some media, with huge thanks to 424778940z for the tests
+    Fix a corner case where settings could be altered after Start had been pressed, if a hotplug event also occurred
+    Additional fixes and improvements
+
+o Version 2.9 (2016.05.17)
+    Add ARM support for UEFI:NTFS
+    Fix UEFI:NTFS support for HP and Gigabyte firmwares (with thanks to Rod Smith and linnaea)
+    Fix unwanted listing of some internal removable drives
+    Fix the resurgence of a possible Syslinux installation crash
+    Fix missing default cluster size default on exFAT for >32GB drives
+    Fix the non-removal of the commandline hogger in some corner cases
+    Use "modern" file selection dialog on Vista or later (if you can spot the difference, good for you...)
+
+o Version 2.8 (2016.03.22)
+    Enable listing of non-USB card readers (EXPERIMENTAL)
+    Major speed improvement for checksum computation
+    Fix UI flicker during progress actualization
+    Fix computation of FAT size for Large FAT32 (with thanks to Ady)
+    Syslinux improvements
+    Update GRUB to 2.02~beta3
+
+o Version 2.7 (2016.02.14)
+    Add Thai translation, courtesy of Sippapas Wangsri
+    Add Drag and Drop support, courtesy of SeymourApps
+    Add a retry for most write operations
+    Update UEFI:NTFS, ms-sys and Grub4DOS to latest
+    Dual sign Rufus with both SHA-1 and SHA-256
+    Fix 2nd line of SHA-256 being hidden on some platforms
+    Fix shutdown prevention issues
+    Additional fixes & translation updates
+
+o Version 2.6 (2015.12.22)
+    Add Serbian (Latin) translation, courtesy of Ivan Strugar
+    Add a cheat mode to zero a device (Alt-Z)
+    Fix dual BIOS/UEFI mode not being disabled once enabled (Alt-E)
+    Fix a crash when Syslinux downloaded files are modified by a firewall
+    Fix FAT32 not being disabled for Windows ISOs in BIOS/CSM mode
+    Additional translation updates
+
+o Version 2.5 (2015.10.26)
+    Add SHA-256 checksum verification
+    Add a cheat mode to disable exclusive USB drive locking (Alt-,)
+    Add digital signature check on update downloads
+    Add Azerbaijani translation, courtesy of Elvin Məlikov
+    Add Persian translation, courtesy of Seyed Zia Azimi (ziaa)
+    Fix an issue where the update settings dialog may not display properly
+    Report Windows build number in the log (Windows 8 or later)
+    Many localization improvements and fixes, especially for right-to-left languages
+    Additional translation updates
+
+o Version 2.4 (2015.09.27)
+    Allow some settings and cheat modes to be persisted between sessions
+    Fix multiple issues with flash drive detection
+    Fix listing of drives that contain no media
+    Fix cheat mode to save the current USB to *uncompressed* VHD (Alt-V)
+    Fix an UI scaling issue with high DPI displays for non English languages
+    Update most of the translations
+    Additional cosmetic improvements
+
+o Version 2.3 (2015.08.28)
+    Detect ISOHybrid images and ask users how they should be written
+    Add MD5/SHA1 checksum verification ('#' button on the status bar)
+    Add Zip decompression support for DD Images
+    Add a cheat mode to save the current USB to *uncompressed* VHD (Alt-V)
+    Add a cheat mode for ISO timestamp preservation (Alt-T)
+    Add a cheat mode for USB enumeration debugging (Alt-.)
+    Disable MS-DOS creation for Windows 10 or later (FreeDOS is still available)
+    Fix Windows To Go creation issues, and enable access to internal disks
+    Fix UEFI support for Fedora ISOs
+    Fix some USB enumeration issues
+    Other improvements and fixes, including translation updates
+
+o Version 2.2 (2015.05.31)
+    Modernize the language selection button, courtesy of David Warner
+    Add keyboard accessibility, courtesy of David Warner
+    Add a clear indication of when UEFI-CSM is to be used
+    Fix an USB detection issue and add support for ASUS UASP "Turbo Mode"
+    Fix prevention of Windows shutdown when Rufus is idle
+    Improve UI on high DPI monitors
+    Update Grub4DOS to 0.4.6a [2015.05.18]
+    Other UI improvements and fixes, including translation updates
+
+o Version 2.1 (2015.03.23)
+    Add 32 bit support to UEFI:NTFS boot
+    Add standalone UEFI:NTFS boot installation, in advanced mode
+    Add Vietnamese translation, courtesy of thanhtai2009
+    Disable support for ISOs that don't report their GRUB version (looking at you Kaspersky!)
+    Fix broken Windows UEFI installation when using GPT/NTFS
+    Fix creation of 32 bit UEFI Windows 10 installation flash drives
+    Other improvements
+
+o Version 2.0 (2015.03.03)
+    Major UI improvements (improved font, new info field, no separate progress dialog, etc.)
+    Add support for Windows To Go (if Rufus is running on Windows 8 or later)
+    Add support for Grub4DOS and GRUB 2 based images (e.g. FreeNAS)
+    Add portable application support, through a 'rufus.ini' file
+    Add native decompression support for DD images (.Z, .gz, .lzma, .bz2 and .xz)
+    Add seamless UEFI boot of NTFS partitions, for Windows ISOs with large files (>4GB)
+    Add support for Windows multipart 'install.swm'
+    Add support for non Microsoft VHD drivers
+    Add Norwegian translation, courtesy of JED
+    Fix a crash on image selection when no device is present
+    Fix broken VHD support for non-English version of Windows
+    Fix write error for DD images that are not a multiple of the sector size
+    Fix broken Unicode support
+    Update embedded Syslinux to 6.03
+    Other improvements and fixes
+
+o Version 1.4.12 (2014.11.09) [BUGFIX RELEASE]
+    Fix support for Red Hat 7 and CentOS 7
+    Fix support for Debian 7.x
+    Fix default listing of Mushkin Ventura Ultra USB 3.0 drives
+    Fix Czech translation, courtesy of Jakub Moc
+    Update Windows version listing for Windows 10
+
+o Version 1.4.11 (2014.11.04)
+    Add Czech translation, courtesy of Richard Kahl
+    Add Ukrainian translation, courtesy of VKS
+    Fix formatting of drives with a large sector size (2K, 4K)
+    Fix UEFI boot for Tails and other Syslinux/EFI based ISOs
+    Fix listing of devices when all 26 drive letters are in use
+    Add a minimize button and minor UI changes
+    Other improvements
+
+o Version 1.4.10 (2014.08.15)
+    Fix a crash when scanning disk images with no USB drive plugged
+    Fix default detection of some OCZ flash drives
+    Improve Syslinux 6.x support (for Tails 1.x and other ISOs)
+    Improve disk image handling (refresh partitions, remount drive, etc.)
+    Other fixes and improvements
+
+o Version 1.4.9 (2014.06.08) [BUGFIX RELEASE]
+    Fix listing of drives for Windows XP and Windows Vista (reported by Alex Andrews)
+
+o Version 1.4.8 (2014.06.03)
+    Add KolibriOS ISO support
+    Add Arabic translation, courtesy of عمر الصمد
+    Add Croatian translation, courtesy of Dario Komar
+    Add Danish translation, courtesy of Jens Hansen
+    Add Latvian translation, courtesy of Aldis Tutins
+    Add Portuguese Brazilian translation, courtesy of Chateaubriand Vieira Moura
+    Allow the use of VHDs as DD image source (fixed disk/uncompressed only)
+    Report the detected USB speed in the log
+    Fix a long standing issue when launching Rufus using Far Manager
+    Fix support for pure UEFI bootable disk images
+    Fix detection for some Buffalo, Lacie, Samsung, Toshiba and Verbatim drives
+    Various other fixes and improvements
+
+o Version 1.4.7 (2014.04.22)
+    Add VHD support as a target, courtesy of Scott
+    Add ReFS support (only for Windows 8.1 or later and only for fixed drives)
+    Add a cheat mode to force the use of DD image writing for dual ISOs
+    Add Japanese translation, courtesy of Chantella Jackson
+    Add Slovak translation, courtesy of martinco78
+    Add Swedish translation, courtesy of Sopor
+    Improve the display of filesizes when copying content
+    Fix FAT32 cluster transitions
+    Fix unpartitioned drives not always being listed
+    Fix bad blocks report
+
+o Version 1.4.6 (2014.03.17)
+    Display USB size in the dropdown list
+    Add Bulgarian translation, courtesy of Krasimir Nevenov
+    Improve checkbox handling in the UI and fix UDF/exFAT formatting issues
+    Fix replacement of obsolete vesamenu.c32 (reported by Liang)
+    Fix an issue that could prevent the download of files from the Rufus website
+    Fix untimely libcdio messages when processing Rock-Ridge ISOs (such as Ubuntu)
+    Other fixes
+
+o Version 1.4.5 (2014.02.27) [BUGFIX RELEASE]
+    Fix detection of fixed drives (reported by dominiquesb)
+
+o Version 1.4.4 (2014.02.26)
+    Add *uncompressed* Disk Image support (FreeBSD, FreeNAS, etc.)
+    Add right-to-left language support
+    Add an alert when multiple partitions are about to be erased
+    Add (unofficial) NTFS Compression support
+    Add Finnish translation, courtesy of Riku Brander
+    Ignore failure on ISO autorun.inf creation, to keep dumb security applications happy
+    Improve hotplug detection
+    Improve Syslinux v5+ support (requires an internet connection to download extra files)
+    Fix support for latest gparted, ArchLinux, and other Syslinux v5+ based ISOs
+    Fix detection for Toshiba drives (again)
+    Fix UDF Unicode support
+
+o Version 1.4.3 (2014.01.21) [BUGFIX RELEASE]
+    Fix format operation not starting on Windows XP (reported by ank91)
+
+o Version 1.4.2 (2014.01.18)
+    Add USB Attached SCSI (UAS) support
+    Add ReactOS support
+    Add NTFS UEFI support, for targets that can support it
+    Add insertion detection for USB memory card readers
+    Add retry when writing ISO files... again
+    Add Chinese (Simplified) translation, courtesy of 佚名
+    Add Indonesian translation, courtesy of Abe Akatsuki
+    Add Malay translation, courtesy of Muhammad Aman
+    Add Portuguese (Portugal) translation, courtesy of Fernando Baptista
+    Speed up boot record cleanup, for slow drives
+    Improve initial locale detection
+    Save user selected locale between sessions
+    Always use English locale in the log, where possible
+    Fix detection for some SanDisk, Kingston, HP and Toshiba drives
+    Fix a potential issue with drive letter assignation
+    Various other fixes and improvements
+
+o Version 1.4.1 (2013.12.05) [BUGFIX RELEASE]
+    Fix broken Syslinux support (reported by ank91)
+    Add Slovenian support, courtesy of Matej Horvat
+
+o Version 1.4.0 (2013.12.02)
+    Add localization support, with native integration for the following languages:
+    - Chinese (Traditional), courtesy of 佚
+    - Dutch, courtesy of Roberto Pino
+    - French, courtesy of myself ("Je vais me gêner !")
+    - German, courtesy of Thilo Langbein
+    - Greek, courtesy of Konstantinos and Nikolaos Margaritis
+    - Hungarian, courtesy of georg1136
+    - Italian, courtesy of bovirus
+    - Korean, courtesy of 나두야간다
+    - Lithuanian, courtesy of Gintaras Venslovas
+    - Polish, courtesy of Piotr Halama
+    - Romanian, courtesy of Gîrlea Alexandru
+    - Russian, courtesy of Кирилл Иванов
+    - Spanish, courtesy of José Pineda
+    - Turkish, courtesy of Mehmetali Kuran
+    - More to come, more wanted! See http://rufus.akeo.ie/translations
+    Add "smart" detection of USB HDD vs USB Flash Drive
+    Add retry when writing ISO files
+    Add detection and display of VID:PID for the target device (in the log)
+    Updated Syslinux to v4.0.7
+    Fixed some issues with DOS localization
+    Fixed FAT32 formatting for large and GPT disks
+    Fixed support for Ubuntu, Scientific Linux, unofficial Windows and other ISOs
+    Various other fixes and improvements
+
+o Version 1.3.4 (2013.07.15)
+    Syslinux v5 support (NEW)
+    UDF formatting support (NEW - Vista and later only)
+    More drive handling improvements, to avoid "Could not open media" errors
+    Fixed support for ISOs containing files larger than 4GB
+    Fixed elevation request for unprivileged users
+    Fixed download of c32 files into the application directory
+    Better compression algorithm for the executable
+    Other bug fixes and improvements (spelling, UI, etc.)
+
+o Version 1.3.3 (2013.06.10)
+    Drive handling and hotplug detection overhaul
+    Add support for raw/unpartitioned drives
+    Add (limited) commandline support, to specify the ISO image to open
+    Add option to list fixed/unpartitioned drives, in the advanced options
+    Fix broken detection of unsupported ISO images
+    Don't assume C: to be the drive letter for DOS
+    Various other fixes and improvements
+
+o Version 1.3.2 (2013.01.27)
+    Fix support for newer ArchLinux ISOs, that was removed in 1.3.1
+    Add support for UEFI boot, as well as GPT. What this means is that Rufus can
+      now produce UEFI bootable UFDs from EFI compatible ISOs, such as Windows 7 x64,
+      Windows 8, ArchLinux, etc.
+    The first partition is now always aligned to 1MB (unless advanced options are used)
+    Internal refactoring and fixes
+
+o Version 1.3.1 (2013.01.09)
+    Fix Windows XP ISO support, that was broken in 1.3.0
+    Drop support for newer ArchLinux ISOs - this will be fixed in 1.3.2
+    Indicate which of FAT32 or Large FAT32 will be used as well as Partition Scheme
+    Various internal fixes
+
+o Version 1.3.0 (2012.12.16)
+    FAT32 format support for >32GB drives
+      Based on fat32format from Ridgecrop Consultants Ltd:
+      http://www.ridgecrop.demon.co.uk/index.htm?fat32format.htm
+    Automated update check
+    Relax ISO9660 compliance for Arch Linux images
+    Add support for VMWare ESXi 5.1 ISO images
+    Update Syslinux to v4.0.6 and libcdio to v0.90
+    Miscellaneous UI improvements and fixes
+
+o Version 1.2.0 (2012.06.04)
+    Single version of Rufus, that includes FreeDOS support always
+    Add a toggleable advanced options panel
+    Add bare Syslinux installation for (FAT partitions only)
+    Add taskbar progress (Windows 7 or later)
+    Integrate logging output in the application
+    Fixes unavailable boot option when an empty card reader is plugged (reported by TheHive)
+    Works around the use of non-ISO compliant LiveXP images (reported by TheHive)
+    Various other bugfixes and improvements
+
+o Version 1.1.7 (2012.04.06):
+    Fixes wrong bootable disk ID introduced in 1.1.6 (reported by Jeff Byers)
+    Fixes support for minint WinPE 1.x images
+
+o Version 1.1.6 (2012.03.27):
+    Add ISO support for Windows XP (SP2 or later), Windows 2003 and BartPE
+
+o Version 1.1.5 (2012.03.12):
+    Fixes detection of devices without friendly name (reported by rschiang)
+    Fixes support of WinPE/AIK ISO images (reported by Dmitry Sokolov)
+    Fixes no disk at launch with empty card readers (reported by ChrisR
+    Add download of vesamenu.c32 for ISOs that need it
+
+o Version 1.1.4 (2012.03.03):
+    Fixes ISO support for directories with extended characters (reported by ChrisR)
+    Fixes bad blocks test issues (reported by steve6375)
+    Read extended labels from autorun.inf when present
+    Update FreeDOS files to latest versions
+
+o Version 1.1.3 (2012.02.24):
+    Fixes an issue on XP when using Windows ISOs (reported by wimb)
+    Disable listing of fixed drives (eg. HDDs)
+    Add 'fake' USB drive detection during bad blocks check
+
+o Version 1.1.2 (2012.02.22):
+    Fixes ISO support for Fedora, openSUSE and Hiren's Boot CD
+    Add icon and extended/international label support
+
+o Version 1.1.1 (2012.02.16):
+    ISO image support (syslinux) - targeted at Linux installation ISOs
+    ISO fixes and UI improvements
+
+o Version 1.1.0 (2012.02.08):
+    ISO image support (NTFS, bootmgr only - targeted at Windows installation ISOs)
+
+o Version 1.0.7 (2012.02.02):
+    Fixes a detection issue on platforms with multiple optical drives (with thanks to ElGaton)
+    Add number of passes for bad blocks check
+    Improved locale selection for FreeDOS
+
+o Version 1.0.6 (2012.01.03):
+    Log report when bad blocks are found
+
+o Version 1.0.5 (2011.12.25):
+    Keyboard layout detection & support
+
+o Version 1.0.4 (2011.12.16):
+    FreeDOS support
+
+o Version 1.0.3 (2011.12.12):
+    First public release
+    Progress status improvements
+    Filtering of invalid cluster sizes
+    Disable Autoplay on Vista and later while the application is running
+
+o Version 1.0.2 (2011.12.06):
+    Beta release
+    Support for bad blocks check
+
+o Version 1.0.1 (2011.12.04):
+    Alpha release
