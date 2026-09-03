@@ -1,5 +1,4 @@
 # Rufus-Legacy: The Reliable USB Formatting Utility
-====================================================
 
 ![Rufus logo](https://raw.githubusercontent.com/non4med-dev/Rufus-Legacy/master/res/icons/Page.png)
 
