@@ -27,7 +27,7 @@ The main features include:
 Rufus Features / Windows Versions That Support Them
 --------------------------------------------------------------------
 
-* Basic USB, flash card and virtual drives formatting to FAT/FAT32/NTFS/SFD (Windows 2000+), UDF/exFAT/ReFS/ext2/ext3 (Windows Vista+)
+* Basic USB, flash card and virtual drives formatting to FAT/FAT32/NTFS (Windows 2000+), UDF/exFAT/ext2/ext3 (Windows Vista+), ReFS (Windows 8.1+)
 * Creating DOS bootable USB drives using [FreeDOS](https://www.freedos.org) or MS-DOS (Windows 2000+)
 * Create BIOS or UEFI bootable drives, including [UEFI bootable NTFS](https://github.com/pbatard/uefi-ntfs) (Windows 2000+)
 * Create bootable drives from bootable ISOs (Windows, Linux, etc.) (Windows 2000+)
@@ -69,12 +69,19 @@ What Sets This Port Apart
 * Original code paths have been retained for natively supported Windows versions
 
 
+Future Goals
+-------------
+Work on adding Windows NT4.0 support (shouldn't be too hard)
+Possibly bring Windows To Go support to Windows 7, we'll see from there
+Find a way around Vista's SSL problem
+
+
 AI Disclaimer
 -------------
 
 The winxp.c and win2k.c aswell as the win2k_imports.asm have been written by AI, and underwent numerous revisions.
 Certain parts of the code I couldn't implement myself, and are 100% AI generated are marked with comments ending with (port-AI)
-I have used AI to improve and optimize certain functions I couldn't have written better myself.
+I have used AI to improve and optimize CERTAIN functions I couldn't have written better myself.
 Without it, this project wouldn't have gotten further than Vista.
 
 I am an amateur, and a complete beginner.
