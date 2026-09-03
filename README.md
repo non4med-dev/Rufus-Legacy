@@ -80,9 +80,11 @@ Without it, this project wouldn't have gotten further than Vista.
 I am an amateur, and a complete beginner.
 I care more about my code working, rather than crying myself to sleep about the fact 10% of it was AI generated.
 If you wish to write those parts yourself, submit Pull requests or fork this directory. 
------------
+
+-------------
 
 Use Visual Studio 2022 and invoke the `.sln` 
+MinGW compilation is not supported for this fork
 
 #### Visual Studio
 
