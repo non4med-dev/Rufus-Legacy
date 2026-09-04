@@ -14,8 +14,8 @@ This fork of Rufus v4.7 is designed to function on the following operating syste
 **Windows 7**<br>
 both 32 and 64 bit
 
-What does it have to offer?
----------------------------
+What it has offer
+-----------------
 
 It restores full functionality back to Windows 7, and all the way down to Windows 2000.<br>
 What sets it apart is attention to detail, proper networking on Windows Vista and 7, <br>
