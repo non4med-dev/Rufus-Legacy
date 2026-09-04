@@ -6,7 +6,7 @@
 
 Introduction
 -------------
-The main goal of this port of Rufus v4.7.2231 is running on the following operating systems:
+This fork of Rufus v4.7.2231 is designed to function on the following operating systems:
 
 * Windows 2000
 * Windows XP
@@ -14,18 +14,24 @@ The main goal of this port of Rufus v4.7.2231 is running on the following operat
 * Windows Vista 32-bit and 64-bit
 * Windows 7 32-bit and 64-bit
 
-It brings full functionality back to Windows 7, and all the way down to Windows 2000.
-What sets it apart is obsessive attention to detail, and little optimizations along the way that added app to performance later.
+It restores full functionality back to Windows 7 (including networking features), and all the way down to Windows 2000.
+What sets it apart is obsessive attention to detail, and many small optimizations along the way, that added up to the performance later:
 
-Flashing a 3,6GB Windows 10 ISO took Rufus v3.22 3m2s, whilst Rufus-Legacy (with a Buffer size of 1MiB) took 2m31s.
+3,6GB - Windows 10 ISO - USB3 - Windows 7
+Rufus v3.22 took 3m2s
+Rufus-Legacy v4.7 took 2m32s (17% faster)
+
+700MB - Windows XP ISO - USB2 - Windows XP
+Rufus v2.18 took 3m38s
+Rufus-Legacy v4.7 took 3m12s (13% faster)
 
 The main features include:
 * Fido ISO downloading on Windows 7
 * DBX UEFI Signature Validations on all versions (local files), downloadable since Vista
-* Creating EFI-bootable GUID Partition Tabled USB-Drives on Windows XP and 2000, to be used on modern machines
+* Creating EFI-bootable GUID Partition Table USB-Drives on Windows XP and 2000, to be used on modern machines
 
-Rufus Features / Windows Versions That Support Them
---------------------------------------------------------------------
+Features And Their Respective OS Requirements
+----------------------------------------------
 
 * Basic USB, flash card and virtual drives formatting to FAT/FAT32/NTFS (Windows 2000+), UDF/exFAT/ext2/ext3 (Windows Vista+), ReFS (Windows 8.1+)
 * Creating DOS bootable USB drives using [FreeDOS](https://www.freedos.org) or MS-DOS (Windows 2000+)
@@ -42,11 +48,6 @@ Rufus Features / Windows Versions That Support Them
 * Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs (Windows 7+)
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives (Windows 8+)
 
-* Modern and familiar UI, with [38 languages natively supported](https://github.com/pbatard/rufus/wiki/FAQ#What_languages_are_natively_supported_by_Rufus)
-* Small footprint. No installation required.
-* Portable. Secure Boot compatible.
-* 100% [Free Software](https://www.gnu.org/philosophy/free-sw) ([GPL v3](https://www.gnu.org/licenses/gpl-3.0))
-
 What Sets This Port Apart
 ---------------------------
 
@@ -60,7 +61,7 @@ What Sets This Port Apart
 * Modern, unbackportable features like VDS are disabled, and related options hidden
 * VHD saving has been restored for Windows 2000 up to Windows 7
 * Rufus updates have been permanently disabled, without affecting remaining network functionality
-* Rufus tamper protection ("Unofficial version" warning) have been disabled
+* Rufus tamper protection ("Unofficial version" warning) has been disabled
 * Connecting to the internet with a VPN has been fixed
 * Application closing through the Close button has been optimized
 * Autorun.ini / .ico files have been disabled (Out of personal preference)
@@ -79,14 +80,14 @@ Find a way around Vista's SSL problem
 AI Disclaimer
 -------------
 
-The winxp.c and win2k.c aswell as the win2k_imports.asm have been written by AI, and underwent numerous revisions.
-Certain parts of the code I couldn't implement myself, and are 100% AI generated are marked with comments ending with (port-AI)
+The winxp.c and win2k.c aswell as the win2k_imports.asm were developed with the use of AI, and underwent numerous revisions.
+Certain parts of the code I couldn't implement myself that are 100% AI generated are marked with comments ending with (port-AI)
 I have used AI to improve and optimize CERTAIN functions I couldn't have written better myself.
 Without it, this project wouldn't have gotten further than Vista.
 
 I am an amateur, and a complete beginner.
-I care more about my code working, rather than crying myself to sleep about the fact 10% of it was AI generated.
-If you wish to write those parts yourself, submit Pull requests or fork this directory. 
+I only care about my code working. That is my main and only objective.
+If you wish to re-write the AI parts yourself, submit a Pull request or be free to fork this directory. 
 
 Compilation
 -----------
@@ -101,3 +102,7 @@ Rufus is an OSI compliant Open Source project. You are entitled to
 download and use the *freely available* [Visual Studio Community Edition](https://www.visualstudio.com/vs/community/)
 to build, run or develop for Rufus. As per the Visual Studio Community Edition license,
 this applies regardless of whether you are an individual or a corporate user.
+
+Rufus is 100% [Free Software](https://www.gnu.org/philosophy/free-sw) ([GPL v3](https://www.gnu.org/licenses/gpl-3.0))
+All credits for the original project go to [Pete Batard](https://github.com/pbatard) and all other contributors.
+Rufus-Legacy is an unofficial fork and is not affiliated with, endorsed by, or otherwise associated with the upstream Rufus project.
