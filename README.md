@@ -43,7 +43,6 @@ Features And Their Respective OS Requirements
 * Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image (Windows 2000+)
 * Perform runtime validation of UEFI bootable media (Windows 2000+) (Local DBX files required!!)
 * Perform bad blocks checks, including detection of "fake" flash drives (Windows 2000+)
-  
 * Download official Microsoft Windows 8, Windows 10 or Windows 11 retail ISOs (Windows 7+)
 * Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs (Windows 7+)
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives (Windows 8+)
@@ -53,9 +52,9 @@ What Sets This Port Apart
 
 * Native and proper Windows 7, Vista, XP and 2000 compatibility with proper API implementations
 * Common Controls v6 backported to Windows 2000 and XP to fix classic theme compatibility issues
-* GUID Partitioning Table (GPT) formatting support for Windows 2000 and Windows XP, to create EFI-bootable media
+* GUID Partitioning Table (GPT) formatting support for Windows 2000 and Windows XP, to create EFI-bootable media (!!!)
 * 1MiB buffer size as it was found to be the fastest on average on USB2 and USB3 drives
-* Created with Windows 7 in mind; flashing ISO files is reportedly ~15% faster compared to v3.22
+* Created with performance in mind; flashing ISO files is reportedly ~15% faster compared to officially supported versions
 * ISO Downloading through Fido on Windows 7
   ([Powershell 7](https://github.com/PowerShell/PowerShell/releases/tag/v7.2.24) is required)
 * Modern, unbackportable features like VDS are disabled, and related options hidden
@@ -68,14 +67,6 @@ What Sets This Port Apart
 * Maximum downloading URL length has been increased from 128 to 1024 to prevent issues in some regions
 * Before Fido runs, it checks for the installed .NET, WMF and Powershell versions
 * Original code paths have been retained for natively supported Windows versions
-
-
-Future Goals
--------------
-Work on adding Windows NT4.0 support (shouldn't be too hard)
-Possibly bring Windows To Go support to Windows 7, we'll see from there
-Find a way around Vista's SSL problem
-
 
 AI Disclaimer
 -------------
