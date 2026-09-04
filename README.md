@@ -8,27 +8,30 @@ Introduction
 -------------
 This fork of Rufus v4.7.2231 is designed to function on the following operating systems:
 
-* Windows 2000
-* Windows XP
-* Windows XP x64 Edition
-* Windows Vista 32-bit and 64-bit
-* Windows 7 32-bit and 64-bit
+Windows 2000<br>
+Windows XP<br>
+Windows XP x64 Edition<br>
+Windows Vista x86 and x64<br>
+Windows 7 x86 and x64<br>
 
-It restores full functionality back to Windows 7 (including networking features), and all the way down to Windows 2000.
-What sets it apart is obsessive attention to detail, and many small optimizations along the way, that added up to the performance later:
+It restores full functionality back to Windows 7, and all the way down to Windows 2000.<br>
+What sets it apart is attention to detail, proper networking on Windows Vista and 7, <br>
+and many small optimizations along the way, which improved UI and ISO flashing performance:<br>
 
-3,6GB - Windows 10 ISO - USB3 - Windows 7
-Rufus v3.22 took 3m2s
-Rufus-Legacy v4.7 took 2m32s (17% faster)
+3,6GB - Windows 10 ISO - USB3 - Windows 7<br>
+Rufus v3.22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;took **3m02s**<br>
+Rufus-Legacy &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;took **2m32s**<br>
+Around **17% faster** on average
 
-700MB - Windows XP ISO - USB2 - Windows XP
-Rufus v2.18 took 3m38s
-Rufus-Legacy v4.7 took 3m12s (13% faster)
+700MB - Windows XP ISO - USB2 - Windows XP<br>
+Rufus v2.18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;took **3m38s**<br>
+Rufus-Legacy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;took **3m12s**<br>
+Around **13% faster** on average
 
-The main features include:
-* Fido ISO downloading on Windows 7
-* DBX UEFI Signature Validations on all versions (local files), downloadable since Vista
-* Creating EFI-bootable GUID Partition Table USB-Drives on Windows XP and 2000, to be used on modern machines
+This project additionally backports:<br>
+Fido ISO downloading on Windows 7<br>
+DBX UEFI Signature Validations on all versions (local files), downloadable since Vista<br>
+Creating EFI-bootable GUID Partition Table USB-Drives on Windows XP and 2000, to be used on modern machines<br>
 
 Features And Their Respective OS Requirements
 ----------------------------------------------
