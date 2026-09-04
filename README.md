@@ -2,7 +2,7 @@
 
 ![Rufus logo](https://raw.githubusercontent.com/non4med-dev/Rufus-Legacy/master/res/icons/Page.png)
 
-Rufus is a utility that helps format and create bootable USB flash drives.
+[Rufus](https://github.com/pbatard/rufus) is a utility that helps format and create bootable USB flash drives.
 
 Introduction
 -------------
@@ -56,7 +56,7 @@ What Sets This Port Apart
 * 1MiB buffer size as it was found to be the fastest on average on USB2 and USB3 drives
 * Created with Windows 7 in mind; flashing ISO files is reportedly ~15% faster compared to v3.22
 * ISO Downloading through Fido on Windows 7
-  (Powershell 7 is required)
+  ([Powershell 7](https://github.com/PowerShell/PowerShell/releases/tag/v7.2.24) is required)
 * Modern, unbackportable features like VDS are disabled, and related options hidden
 * VHD saving has been restored for Windows 2000 up to Windows 7
 * Rufus updates have been permanently disabled, without affecting remaining network functionality
@@ -88,10 +88,12 @@ I am an amateur, and a complete beginner.
 I care more about my code working, rather than crying myself to sleep about the fact 10% of it was AI generated.
 If you wish to write those parts yourself, submit Pull requests or fork this directory. 
 
--------------
+Compilation
+-----------
 
-Use Visual Studio 2022 and invoke the `.sln` 
-MinGW compilation is not supported for this fork
+Use Visual Studio 2022 and then invoke the `.sln` 
+
+MinGW is not supported for this fork.
 
 #### Visual Studio
 
