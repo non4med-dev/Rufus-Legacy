@@ -1,8 +1,8 @@
 # Rufus-Legacy: The Reliable USB Formatting Utility
 
-![Rufus logo](https://raw.githubusercontent.com/non4med-dev/Rufus-Legacy/master/res/icons/Page.png)
+![Rufus-Legacy-Banner](https://raw.githubusercontent.com/non4med-dev/Rufus-Legacy/master/res/icons/Banner.png)
 
-[Rufus](https://github.com/pbatard/rufus) is a utility that helps format and create bootable USB flash drives.
+Rufus is a utility that helps format and create bootable USB flash drives.
 
 Introduction
 -------------
