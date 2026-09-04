@@ -6,13 +6,16 @@ Rufus is a utility that helps format and create bootable USB flash drives.
 
 Introduction
 -------------
-This fork of Rufus v4.7.2231 is designed to function on the following operating systems:
+This fork of Rufus v4.7 is designed to function on the following operating systems:
 
-Windows 2000<br>
-Windows XP<br>
-Windows XP x64 Edition<br>
-Windows Vista x86 and x64<br>
-Windows 7 x86 and x64<br>
+**Windows 2000**<br>
+**Windows XP**<br>
+**Windows Vista**<br>
+**Windows 7**<br>
+both 32 and 64 bit
+
+What does it have to offer?
+---------------------------
 
 It restores full functionality back to Windows 7, and all the way down to Windows 2000.<br>
 What sets it apart is attention to detail, proper networking on Windows Vista and 7, <br>
@@ -29,12 +32,12 @@ Rufus-Legacy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;took **3m12s**
 Around **13% faster** on average
 
 This project additionally backports:<br>
-Fido ISO downloading on Windows 7<br>
-DBX UEFI Signature Validations on all versions (local files), downloadable since Vista<br>
+Fido ISO downloading to Windows 7<br>
+DBX UEFI Signature Validation (Uses local files on XP and 2000, downloadable since Vista)<br>
 Creating EFI-bootable GUID Partition Table USB-Drives on Windows XP and 2000, to be used on modern machines<br>
 
-Features And Their Respective OS Requirements
-----------------------------------------------
+Features / OS Requirements
+---------------------------
 
 * Basic USB, flash card and virtual drives formatting to FAT/FAT32/NTFS (Windows 2000+), UDF/exFAT/ext2/ext3 (Windows Vista+), ReFS (Windows 8.1+)
 * Creating DOS bootable USB drives using [FreeDOS](https://www.freedos.org) or MS-DOS (Windows 2000+)
@@ -50,8 +53,8 @@ Features And Their Respective OS Requirements
 * Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs (Windows 7+)
 * Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives (Windows 8+)
 
-What Sets This Port Apart
----------------------------
+What makes it different
+-----------------------
 
 * Native and proper Windows 7, Vista, XP and 2000 compatibility with proper API implementations
 * Common Controls v6 backported to Windows 2000 and XP to fix classic theme compatibility issues
