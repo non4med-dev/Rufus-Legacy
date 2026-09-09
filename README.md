@@ -1,37 +1,20 @@
-# Rufus-Legacy: The Reliable USB Formatting Utility
-====================================================
+# Rufus-Legacy
+### The Reliable USB Formatting Utility for Windows 2000 - Windows 7
 
-![Rufus logo](https://raw.githubusercontent.com/non4med-dev/Rufus-Legacy/master/res/icons/Page.png)
+![Rufus-Legacy-Banner](https://raw.githubusercontent.com/non4med-dev/Rufus-Legacy/master/res/icons/Banner.png)
 
-Rufus is a utility that helps format and create bootable USB flash drives.
+The original project can be found [under this link.](https://github.com/pbatard/rufus)
 
-Introduction
--------------
-The main goal of this port of Rufus v4.7.2231 is running on the following operating systems:
+Important Notes
+---------------
 
-<<<<<<< HEAD
-* Windows 2000
-* Windows XP
-* Windows XP x64 Edition
-* Windows Vista 32-bit and 64-bit
-* Windows 7 32-bit and 64-bit
-=======
 DBX updates are currently broken. Follow pull [#468](https://github.com/microsoft/secureboot_objects/pull/468) and thread [#3039](https://github.com/pbatard/rufus/issues/3039) for more information.<br>
 Rufus already contains embedded copies of these files, so no functionality should be affected.<br>
 The most recent dbx files of this format can still be found inside winxp-win2k.zip<br>
->>>>>>> e541efd (Typos (again))
 
-It brings full functionality back to Windows 7, and all the way down to Windows 2000.
-What sets it apart is obsessive attention to detail, and little optimizations along the way that added app to performance later.
+Features
+--------
 
-Flashing a 3,6GB Windows 10 ISO took Rufus v3.22 3m2s, whilst Rufus-Legacy (with a Buffer size of 1MiB) took 2m31s.
-
-<<<<<<< HEAD
-The main features include:
-* Fido ISO downloading on Windows 7
-* DBX UEFI Signature Validations on all versions (local files), downloadable since Vista
-* Creating EFI-bootable GUID Partition Tabled USB-Drives on Windows XP and 2000, to be used on modern machines
-=======
 - Basic USB, flash card and virtual drives formatting to FAT/FAT32/NTFS (Windows 2000+), UDF/exFAT/ext2/ext3 (Windows Vista+), and ReFS (Windows 8.1+)<br>
 - Creating DOS bootable USB drives using [FreeDOS](https://www.freedos.org) or MS-DOS (Windows 2000+)<br>
 - Create BIOS or UEFI bootable drives, including [UEFI bootable NTFS](https://github.com/pbatard/uefi-ntfs) (Windows 2000+)<br>
@@ -40,35 +23,18 @@ The main features include:
 - Create VHD/DD (Windows 2000+), VHDX (Windows 8+) and FFU (Windows 10 1709+) images of an existing drive<br>
 - Create persistent Linux partitions (Windows 2000+)<br>
 - Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image (Windows 2000+)<br>
-- Perform runtime validation of UEFI bootable media (Windows 2000+)<br>
+- Perform runtime validation of UEFI bootable media (Windows 2000+) (Check readme!!)<br>
 - Perform bad blocks checks, including detection of "fake" flash drives (Windows 2000+)<br>
 - Download official Microsoft Windows 8, Windows 10 or Windows 11 retail ISOs (Windows 7+)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;-> (WARNING: On Windows 7 [PowerShell 7.2](https://github.com/PowerShell/PowerShell/releases/tag/v7.2.24) must be installed for ISO downloading to work)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-> (WARNING: On Windows 7 [Powershell 7.2](https://github.com/PowerShell/PowerShell/releases/tag/v7.2.24) must be installed for ISO downloading to work)<br>
 - Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs (Windows 7+)<br>
-- Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives (Windows 8+)<br>
->>>>>>> e541efd (Typos (again))
+- Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives (Windows 8+) (Windows XP+ planned for the next update)<br>
 
-Rufus Features / Windows Versions That Support Them
---------------------------------------------------------------------
+Changes
+--------
 
-<<<<<<< HEAD
-* Basic USB, flash card and virtual drives formatting to FAT/FAT32/NTFS/SFD (Windows 2000+), UDF/exFAT/ReFS/ext2/ext3 (Windows Vista+)
-* Creating DOS bootable USB drives using [FreeDOS](https://www.freedos.org) or MS-DOS (Windows 2000+)
-* Create BIOS or UEFI bootable drives, including [UEFI bootable NTFS](https://github.com/pbatard/uefi-ntfs) (Windows 2000+)
-* Create bootable drives from bootable ISOs (Windows, Linux, etc.) (Windows 2000+)
-* Create bootable drives from bootable disk images, including compressed ones (Windows 2000+)
-* Create VHD/DD (Windows 2000+), VHDX (Windows 8+) and FFU (Windows 10 1709+) images of an existing drive
-* Create persistent Linux partitions (Windows 2000+)
-* Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image (Windows 2000+)
-* Perform runtime validation of UEFI bootable media (Windows 2000+) (Local DBX files required!!)
-* Perform bad blocks checks, including detection of "fake" flash drives (Windows 2000+)
-  
-* Download official Microsoft Windows 8, Windows 10 or Windows 11 retail ISOs (Windows 7+)
-* Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs (Windows 7+)
-* Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives (Windows 8+)
-=======
 - Native and proper Windows 7, Vista, XP and 2000 compatibility with proper API implementations<br>
-- Common Controls v6 backported to Windows 2000 to fix theme-related issues<br>
+- Common Controls v6 backported to Windows 2000 (and XP) to fix theme-related issues<br>
 - GUID Partitioning Table (GPT) formatting support for Windows 2000 and Windows XP, to create EFI-bootable media (!!!)<br>
 - Increased file-copying performance (1MiB buffer size) -> Flashing ISO files is ~15% faster on average<br>
 - All unsupported features (VDS, VHDX, Windows To Go) are only visible and enabled on supported operating systems
@@ -76,54 +42,37 @@ Rufus Features / Windows Versions That Support Them
 - Rufus updates have been permanently disabled, without affecting remaining network functionality
 - Connecting to the internet with a VPN on Windows 7 and older has been fixed
 - Application closing through the Close button has been optimized
-- Autorun.inf / .ico files have been permanently disabled
+- Autorun.ini / .ico files have been permanently disabled
 - Maximum URL download length has been increased from 128 to 1024 to prevent issues in some regions
 - Before Fido (ISO downloading) runs, it checks for the installed .NET, WMF and Powershell versions
 - Original code paths have been retained for natively supported Windows versions (so nothing breaks!)<br>
-Note: Rufus-Legacy mostly creates OS-specific fallbacks rather than replacing original code
->>>>>>> e541efd (Typos (again))
+Note: Rufus-Legacy mostly creates OS-specific fallbacks rather than replacing original code; functionaly on Windows 8+ is not affected
 
-* Modern and familiar UI, with [38 languages natively supported](https://github.com/pbatard/rufus/wiki/FAQ#What_languages_are_natively_supported_by_Rufus)
-* Small footprint. No installation required.
-* Portable. Secure Boot compatible.
-* 100% [Free Software](https://www.gnu.org/philosophy/free-sw) ([GPL v3](https://www.gnu.org/licenses/gpl-3.0))
+More about the project
+----------------------
+Rufus-Legacy is based on Rufus 4.7.2231 (released April 9, 2025). It's the last version of Rufus to compile with Visual Studio 2022 17.6 and use a non-WIMlib base, which older operating systems don't benefit from.
 
-What Sets This Port Apart
----------------------------
+Newer releases of Rufus-Legacy will slowly and selectively implement features found in newer versions of Rufus, for example attempting to experimentally backport support for creating Windows To Go drives, which currently rely on components introduced in Windows 8.
 
-* Native and proper Windows 7, Vista, XP and 2000 compatibility with proper API implementations
-* Common Controls v6 backported to Windows 2000 and XP to fix classic theme compatibility issues
-* GUID Partitioning Table (GPT) formatting support for Windows 2000 and Windows XP, to create EFI-bootable media
-* 1MiB buffer size as it was found to be the fastest on average on USB2 and USB3 drives
-* Created with Windows 7 in mind; flashing ISO files is reportedly ~15% faster compared to v3.22
-* ISO Downloading through Fido on Windows 7
-  (Powershell 7 is required)
-* Modern, unbackportable features like VDS are disabled, and related options hidden
-* VHD saving has been restored for Windows 2000 up to Windows 7
-* Rufus updates have been permanently disabled, without affecting remaining network functionality
-* Rufus tamper protection ("Unofficial version" warning) have been disabled
-* Connecting to the internet with a VPN has been fixed
-* Application closing through the Close button has been optimized
-* Autorun.ini / .ico files have been disabled (Out of personal preference)
-* Maximum downloading URL length has been increased from 128 to 1024 to prevent issues in some regions
-* Before Fido runs, it checks for the installed .NET, WMF and Powershell versions
-* Original code paths have been retained for natively supported Windows versions
-
+Basing Rufus-Legacy on a single stable build lets me focus on adding proper support and optimizations for legacy platforms, ensuring reliability the same way the original project does.<br>
+Over time I'll attempt to make this project more independent from the upstream main branch so it can focus entirely on features older OSes can actually benefit from.
 
 AI Disclaimer
 -------------
 
-The winxp.c and win2k.c aswell as the win2k_imports.asm have been written by AI, and underwent numerous revisions.
-Certain parts of the code I couldn't implement myself, and are 100% AI generated are marked with comments ending with (port-AI)
-I have used AI to improve and optimize certain functions I couldn't have written better myself.
-Without it, this project wouldn't have gotten further than Vista.
+Some parts of the code; i.e. the API implementations winxp.c win2k.c as well as win2k_imports.asm have been developed with the use of AI and underwent numerous revisions.<br>
+Certain parts of the code that have been written with the help of AI are marked with comments ending with (port-AI)
+I have used AI to look over parts of my code, improve, safecheck and optimize them, to ensure the stability of the custom-written code.
 
-I am an amateur, and a complete beginner.
-I care more about my code working, rather than crying myself to sleep about the fact 10% of it was AI generated.
-If you wish to write those parts yourself, submit Pull requests or fork this directory. 
+I am an amateur, and a beginner.
+My main and only objective objective is delivering actually working code.
+
+Compilation
 -----------
 
-Use Visual Studio 2022 and invoke the `.sln` 
+Use Visual Studio 2022 and then invoke the `.sln` 
+
+MinGW compiling isn't supported for this fork.
 
 #### Visual Studio
 
@@ -131,3 +80,7 @@ Rufus is an OSI compliant Open Source project. You are entitled to
 download and use the *freely available* [Visual Studio Community Edition](https://www.visualstudio.com/vs/community/)
 to build, run or develop for Rufus. As per the Visual Studio Community Edition license,
 this applies regardless of whether you are an individual or a corporate user.
+
+Rufus is 100% [Free Software](https://www.gnu.org/philosophy/free-sw) ([GPL v3](https://www.gnu.org/licenses/gpl-3.0))
+All credits for the original project go to [Pete Batard](https://github.com/pbatard) and all other contributors.
+Rufus-Legacy is an unofficial fork and is not affiliated with, endorsed by, or otherwise associated with the upstream Rufus project.
