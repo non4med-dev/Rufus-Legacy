@@ -42,11 +42,11 @@ Changes
 - Rufus updates have been permanently disabled, without affecting remaining network functionality
 - Connecting to the internet with a VPN on Windows 7 and older has been fixed
 - Application closing through the Close button has been optimized
-- Autorun.ini / .ico files have been permanently disabled
+- autorun.inf / .ico files have been permanently disabled
 - Maximum URL download length has been increased from 128 to 1024 to prevent issues in some regions
 - Before Fido (ISO downloading) runs, it checks for the installed .NET, WMF and Powershell versions
 - Original code paths have been retained for natively supported Windows versions (so nothing breaks!)<br>
-Note: Rufus-Legacy mostly creates OS-specific fallbacks rather than replacing original code; functionaly on Windows 8+ is not affected
+Note: Rufus-Legacy mostly creates OS-specific fallbacks rather than replacing original code
 
 More about the project
 ----------------------
@@ -65,7 +65,7 @@ Certain parts of the code that have been written with the help of AI are marked 
 I have used AI to look over parts of my code, improve, safecheck and optimize them, to ensure the stability of the custom-written code.
 
 I am an amateur, and a beginner.
-My main and only objective objective is delivering actually working code.
+My main and only objective is delivering actually working code.
 
 Compilation
 -----------
