@@ -589,10 +589,13 @@ void SetSectionHeaders(HWND hDlg, HFONT* hFont)
 	int i;
 
 	// Set the section header fonts and resize the static controls accordingly
+	// Another fix attempt for XPs font
 	if (*hFont == NULL) {
 		HDC hDC = GetDC(hMainDialog);
-		*hFont = CreateFontA(-MulDiv(14, GetDeviceCaps(hDC, LOGPIXELSY), 72), 0, 0, 0,
-			FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET, 0, 0, PROOF_QUALITY, 0, "Segoe UI");
+		*hFont = CreateFontA(-MulDiv(14, GetDeviceCaps(hDC, LOGPIXELSY), 72),
+			0, 0, 0, FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+			0, 0, PROOF_QUALITY, 0,
+			(WindowsVersion.Version <= WINDOWS_XP) ? "Tahoma" : "Segoe UI");
 		safe_release_dc(hMainDialog, hDC);
 	}
 
@@ -808,9 +811,15 @@ void ToggleImageOptions(void)
 	BOOL has_wintogo, has_persistence;
 	uint8_t entry_image_options = image_options;
 	int i, shift = rh;
-
+	/*
 	has_wintogo = ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso || img_report.is_windows_img) &&
 		(WindowsVersion.Version >= WINDOWS_8) && (HAS_WINTOGO(img_report)));
+	has_persistence = ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso) && (HAS_PERSISTENCE(img_report)));
+	*/
+
+	// Remove Windows To Go version check, add settings option (port)
+	has_wintogo = enable_windows_to_go && ((boot_type == BT_IMAGE) && (image_path != NULL) &&
+		(img_report.is_iso || img_report.is_windows_img) && HAS_WINTOGO(img_report));
 	has_persistence = ((boot_type == BT_IMAGE) && (image_path != NULL) && (img_report.is_iso) && (HAS_PERSISTENCE(img_report)));
 
 	assert(popcnt8(image_options) <= 1);

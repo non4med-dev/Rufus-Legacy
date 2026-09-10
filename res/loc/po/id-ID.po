@@ -1851,8 +1851,8 @@ msgid "Persistent log"
 msgstr "Catatan yang tetap/persistent"
 
 #. • MSG_355
-msgid "Enable GPT (experimental)"
-msgstr "Aktifkan GPT (eksperimental)"
+msgid "Enable GPT"
+msgstr "Aktifkan GPT"
 
 #. • MSG_356
 msgid "Windows XP cannot access drives that use the GPT partition scheme.\n\nRufus can still create this drive for use on another computer. Continue only if you are creating EFI-bootable media and the target computer supports UEFI.\n\nDo you want to continue?"

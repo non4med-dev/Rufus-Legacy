@@ -50,6 +50,13 @@
 #define WIM_HAS_API_EXTRACT					1
 #define WIM_HAS_7Z_EXTRACT					2
 #define WIM_HAS_API_APPLY					4
+// I love you wimlib <3 (Windows To Go) (port)
+// I will port your bitchass to 2000 one day
+#define WIM_HAS_WIMLIB_APPLY				8
+#define WIM_HAS_WIMLIB_INFO					16
+#define WIM_HAS_EXTRACT(r)					(r & (WIM_HAS_API_EXTRACT|WIM_HAS_7Z_EXTRACT))
+#define WIM_HAS_APPLY(r)					(r & (WIM_HAS_API_APPLY|WIM_HAS_WIMLIB_APPLY))
+
 #define WIM_HAS_EXTRACT(r)					(r & (WIM_HAS_API_EXTRACT|WIM_HAS_7Z_EXTRACT))
 
 #define SECONDS_SINCE_JAN_1ST_2000			946684800
@@ -183,6 +190,8 @@ extern uint8_t WimExtractCheck(BOOL bSilent);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst, BOOL bSilent);
 extern BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst, BOOL bSilent);
 extern BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst, BOOL bSilent);
+// Define WimExtractMetadata for the Windows To Go fallback (port)
+extern BOOL WimExtractMetadata(const char* image, const char* dst, BOOL bSilent);
 extern BOOL WimApplyImage(const char* image, int index, const char* dst);
 extern char* WimMountImage(const char* image, int index);
 extern BOOL WimUnmountImage(const char* image, int index, BOOL commit);

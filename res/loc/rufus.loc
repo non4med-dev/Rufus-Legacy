@@ -617,7 +617,7 @@ t MSG_354 "Rufus has found an updated version of the DBX files used to perform U
 	"- Select 'Yes' to connect to the Internet and download this content\n"
 	"- Select 'No' to cancel the operation\n\n"
 	"Note: The files will be downloaded in the application's directory and will be reused automatically if present."
-t MSG_355 "Enable GPT (experimental)"
+t MSG_355 "Enable GPT"
 t MSG_356 "Windows XP cannot access drives that use the GPT partition scheme.\n\nRufus can still create this drive for use on another computer. Continue only if you are creating EFI-bootable media and the target computer supports UEFI.\n\nDo you want to continue?"
 t MSG_357 "Rufus"
 t MSG_358 "Choose how Rufus should write this ISOHybrid image.\n\nYes - ISO mode (recommended)\nNo - EFI System Partition (ESP) mode"
@@ -651,7 +651,7 @@ t MSG_922 "Download UEFI Shell ISOs"
 l "ar-SA" "Arabic (العربية)" 0x0401, 0x0801, 0x0c01, 0x1001, 0x1401, 0x1801, 0x1c01, 0x2001, 0x2401, 0x2801, 0x2c01, 0x3001, 0x3401, 0x3801, 0x3c01, 0x4001
 v 4.5
 b "en-US"
-t MSG_355 "تمكين GPT (تجريبي)"
+t MSG_355 "تمكين GPT"
 t MSG_356 "يتعذر على Windows XP الوصول إلى محركات الأقراص التي تستخدم مخطط تقسيم GPT.\n\nلا يزال بإمكان Rufus إنشاء محرك الأقراص هذا لاستخدامه على كمبيوتر آخر. تابع فقط إذا كنت تنشئ وسائط قابلة للإقلاع بنمط EFI وكان الكمبيوتر الهدف يدعم UEFI.\n\nهل تريد المتابعة؟"
 t MSG_357 "Rufus"
 t MSG_358 "اختر كيفية كتابة Rufus لصورة ISOHybrid هذه.\n\nنعم - وضع ISO (موصى به)\nلا - وضع قسم نظام EFI ‏(ESP)"
@@ -1087,7 +1087,7 @@ t MSG_922 "قم بتنزيل UEFI Shell ISOs"
 l "bg-BG" "Bulgarian (Български)" 0x0402
 v 3.22
 b "en-US"
-t MSG_355 "Активиране на GPT (експериментално)"
+t MSG_355 "Активиране на GPT"
 t MSG_356 "Windows XP няма достъп до устройства, които използват GPT схема за дялове.\n\nRufus все пак може да създаде това устройство за използване на друг компютър. Продължете само ако създавате стартиращ EFI носител и целевият компютър поддържа UEFI.\n\nИскате ли да продължите?"
 t MSG_357 "Rufus"
 t MSG_358 "Изберете как Rufus да запише този ISOHybrid образ.\n\nДа - режим ISO (препоръчително)\nНе - режим на системен дял EFI (ESP)"
@@ -1507,7 +1507,7 @@ t MSG_922 "Изтегляне на UEFI Shell образи"
 l "zh-CN" "Chinese Simplified (简体中文)" 0x0804, 0x1004
 v 4.5
 b "en-US"
-t MSG_355 "启用 GPT（实验性）"
+t MSG_355 "启用 GPT"
 t MSG_356 "Windows XP 无法访问使用 GPT 分区方案的驱动器。\n\nRufus 仍可创建此驱动器供其他计算机使用。仅当您要创建 EFI 可启动介质且目标计算机支持 UEFI 时才继续。\n\n是否继续？"
 t MSG_357 "Rufus"
 t MSG_358 "请选择 Rufus 写入此 ISOHybrid 镜像的方式。\n\n是 - ISO 模式（推荐）\n否 - EFI 系统分区 (ESP) 模式"
@@ -1934,7 +1934,7 @@ t MSG_922 "下载 UEFI Shell 镜像"
 l "zh-TW" "Chinese Traditional (正體中文)" 0x0404, 0x0c04, 0x1404, 0x7c04
 v 4.5
 b "en-US"
-t MSG_355 "啟用 GPT（實驗性）"
+t MSG_355 "啟用 GPT"
 t MSG_356 "Windows XP 無法存取使用 GPT 分割區配置的磁碟機。\n\nRufus 仍可建立此磁碟機供其他電腦使用。僅當您要建立 EFI 開機媒體且目標電腦支援 UEFI 時才繼續。\n\n是否繼續？"
 t MSG_357 "Rufus"
 t MSG_358 "請選擇 Rufus 寫入此 ISOHybrid 映像檔的方式。\n\n是 - ISO 模式（建議）\n否 - EFI 系統分割區 (ESP) 模式"
@@ -2361,7 +2361,7 @@ t MSG_922 "下載 UEFI Shell 映像檔"
 l "hr-HR" "Croatian (Hrvatski)" 0x041a, 0x081a, 0x101a
 v 4.5
 b "en-US"
-t MSG_355 "Omogući GPT (eksperimentalno)"
+t MSG_355 "Omogući GPT"
 t MSG_356 "Windows XP ne može pristupiti pogonima koji koriste GPT particijsku shemu.\n\nRufus ipak može izraditi ovaj pogon za korištenje na drugom računalu. Nastavite samo ako izrađujete EFI medij za pokretanje i ciljno računalo podržava UEFI.\n\nŽelite li nastaviti?"
 t MSG_357 "Rufus"
 t MSG_358 "Odaberite kako Rufus treba zapisati ovu ISOHybrid sliku.\n\nDa - ISO način (preporučeno)\nNe - način EFI sistemske particije (ESP)"
@@ -2786,7 +2786,7 @@ t MSG_922 "Preuzmite ISO-ove UEFI ljuske"
 l "cs-CZ" "Czech (Čeština)" 0x0405
 v 4.5
 b "en-US"
-t MSG_355 "Povolit GPT (experimentální)"
+t MSG_355 "Povolit GPT"
 t MSG_356 "Windows XP nemůže přistupovat k jednotkám, které používají schéma oddílů GPT.\n\nRufus přesto může tuto jednotku vytvořit pro použití v jiném počítači. Pokračujte pouze v případě, že vytváříte spouštěcí médium EFI a cílový počítač podporuje UEFI.\n\nChcete pokračovat?"
 t MSG_357 "Rufus"
 t MSG_358 "Vyberte, jak má Rufus zapsat tento obraz ISOHybrid.\n\nAno - režim ISO (doporučeno)\nNe - režim systémového oddílu EFI (ESP)"
@@ -3208,7 +3208,7 @@ t MSG_922 "Stažení souborů UEFI Shell ISO"
 l "da-DK" "Danish (Dansk)" 0x0406
 v 4.5
 b "en-US"
-t MSG_355 "Aktivér GPT (eksperimentel)"
+t MSG_355 "Aktivér GPT"
 t MSG_356 "Windows XP kan ikke få adgang til drev, der bruger GPT-partitionsskemaet.\n\nRufus kan stadig oprette dette drev til brug på en anden computer. Fortsæt kun, hvis du opretter et EFI-startmedie, og destinationscomputeren understøtter UEFI.\n\nVil du fortsætte?"
 t MSG_357 "Rufus"
 t MSG_358 "Vælg, hvordan Rufus skal skrive dette ISOHybrid-diskbillede.\n\nJa - ISO-tilstand (anbefalet)\nNej - EFI-systempartitionstilstand (ESP)"
@@ -3624,7 +3624,7 @@ t MSG_922 "Hent UEFI Shell ISOer"
 l "nl-NL" "Dutch (Nederlands)" 0x0413, 0x0813
 v 4.5
 b "en-US"
-t MSG_355 "GPT inschakelen (experimenteel)"
+t MSG_355 "GPT inschakelen"
 t MSG_356 "Windows XP heeft geen toegang tot stations die het GPT-partitieschema gebruiken.\n\nRufus kan dit station nog steeds maken voor gebruik op een andere computer. Ga alleen door als u opstartbare EFI-media maakt en de doelcomputer UEFI ondersteunt.\n\nWilt u doorgaan?"
 t MSG_357 "Rufus"
 t MSG_358 "Kies hoe Rufus deze ISOHybrid-image moet schrijven.\n\nJa - ISO-modus (aanbevolen)\nNee - EFI-systeempartitiemodus (ESP)"
@@ -4045,7 +4045,7 @@ t MSG_922 "UEFI Shell ISO's downloaden"
 l "fi-FI" "Finnish (Suomi)" 0x040B
 v 4.5
 b "en-US"
-t MSG_355 "Ota GPT käyttöön (kokeellinen)"
+t MSG_355 "Ota GPT käyttöön"
 t MSG_356 "Windows XP ei voi käyttää GPT-osiomallia käyttäviä asemia.\n\nRufus voi silti luoda tämän aseman toisessa tietokoneessa käytettäväksi. Jatka vain, jos luot EFI-käynnistysmediaa ja kohdetietokone tukee UEFI:a.\n\nHaluatko jatkaa?"
 t MSG_357 "Rufus"
 t MSG_358 "Valitse, miten Rufus kirjoittaa tämän ISOHybrid-levykuvan.\n\nKyllä - ISO-tila (suositeltu)\nEi - EFI-järjestelmäosiotila (ESP)"
@@ -4471,7 +4471,7 @@ t MSG_922 "Lataa UEFI Shell ISO-levykuvia"
 l "fr-FR" "French (Français)" 0x040c, 0x080c, 0x0c0c, 0x100c, 0x140c, 0x180c, 0x1c0c, 0x200c, 0x240c, 0x280c, 0x2c0c, 0x300c, 0x340c, 0x380c, 0xe40c
 v 4.5
 b "en-US"
-t MSG_355 "Activer GPT (expérimental)"
+t MSG_355 "Activer GPT"
 t MSG_356 "Windows XP ne peut pas accéder aux lecteurs utilisant le schéma de partition GPT.\n\nRufus peut néanmoins créer ce lecteur afin de l’utiliser sur un autre ordinateur. Continuez uniquement si vous créez un support de démarrage EFI et si l’ordinateur cible prend en charge l’UEFI.\n\nVoulez-vous continuer ?"
 t MSG_357 "Rufus"
 t MSG_358 "Choisissez la manière dont Rufus doit écrire cette image ISOHybrid.\n\nOui - Mode ISO (recommandé)\nNon - Mode partition système EFI (ESP)"
@@ -4898,7 +4898,7 @@ t MSG_922 "Téléchargez des images ISOs du Shell UEFI"
 l "de-DE" "German (Deutsch)" 0x0407, 0x0807, 0x0c07, 0x1007, 0x1407
 v 4.5
 b "en-US"
-t MSG_355 "GPT aktivieren (experimentell)"
+t MSG_355 "GPT aktivieren"
 t MSG_356 "Windows XP kann nicht auf Laufwerke mit GPT-Partitionsschema zugreifen.\n\nRufus kann dieses Laufwerk dennoch für die Verwendung auf einem anderen Computer erstellen. Fahren Sie nur fort, wenn Sie ein EFI-bootfähiges Medium erstellen und der Zielcomputer UEFI unterstützt.\n\nMöchten Sie fortfahren?"
 t MSG_357 "Rufus"
 t MSG_358 "Wählen Sie, wie Rufus dieses ISOHybrid-Abbild schreiben soll.\n\nJa - ISO-Modus (empfohlen)\nNein - EFI-Systempartitionsmodus (ESP)"
@@ -5309,7 +5309,7 @@ t MSG_922 "UEFI-Shell-ISOs herunterladen"
 l "el-GR" "Greek (Ελληνικά)" 0x0408
 v 4.5
 b "en-US"
-t MSG_355 "Ενεργοποίηση GPT (πειραματικό)"
+t MSG_355 "Ενεργοποίηση GPT"
 t MSG_356 "Τα Windows XP δεν μπορούν να αποκτήσουν πρόσβαση σε μονάδες που χρησιμοποιούν σχήμα διαμερισμάτων GPT.\n\nΤο Rufus μπορεί παρ' όλα αυτά να δημιουργήσει αυτή τη μονάδα για χρήση σε άλλον υπολογιστή. Συνεχίστε μόνο αν δημιουργείτε εκκινήσιμο μέσο EFI και ο υπολογιστής προορισμού υποστηρίζει UEFI.\n\nΘέλετε να συνεχίσετε;"
 t MSG_357 "Rufus"
 t MSG_358 "Επιλέξτε πώς θα εγγράψει το Rufus αυτή την εικόνα ISOHybrid.\n\nΝαι - Λειτουργία ISO (συνιστάται)\nΌχι - Λειτουργία διαμερίσματος συστήματος EFI (ESP)"
@@ -5730,7 +5730,7 @@ t MSG_922 "Κατεβάστε τα ISO Shell UEFI"
 l "he-IL" "Hebrew (עברית)" 0x040d
 v 4.5
 b "en-US"
-t MSG_355 "אפשר GPT (ניסיוני)"
+t MSG_355 "אפשר GPT"
 t MSG_356 "Windows XP אינו יכול לגשת לכוננים המשתמשים בסכימת המחיצות GPT.\n\nRufus עדיין יכול ליצור כונן זה לשימוש במחשב אחר. המשך רק אם אתה יוצר מדיית אתחול EFI ומחשב היעד תומך ב-UEFI.\n\nהאם להמשיך?"
 t MSG_357 "Rufus"
 t MSG_358 "בחר כיצד Rufus יכתוב את תמונת ה-ISOHybrid הזו.\n\nכן - מצב ISO (מומלץ)\nלא - מצב מחיצת מערכת EFI ‏(ESP)"
@@ -6168,7 +6168,7 @@ t MSG_922 "הורדת קובצי ISO של מעטפת UEFI"
 l "hu-HU" "Hungarian (Magyar)" 0x040e
 v 4.5
 b "en-US"
-t MSG_355 "GPT engedélyezése (kísérleti)"
+t MSG_355 "GPT engedélyezése"
 t MSG_356 "A Windows XP nem tud hozzáférni a GPT partíciós sémát használó meghajtókhoz.\n\nA Rufus ettől függetlenül létre tudja hozni ezt a meghajtót egy másik számítógépen való használatra. Csak akkor folytassa, ha EFI rendszerindító adathordozót készít, és a célszámítógép támogatja az UEFI-t.\n\nFolytatja?"
 t MSG_357 "Rufus"
 t MSG_358 "Válassza ki, hogyan írja ki a Rufus ezt az ISOHybrid-lemezképet.\n\nIgen - ISO mód (ajánlott)\nNem - EFI rendszerpartíció (ESP) mód"
@@ -6594,7 +6594,7 @@ t MSG_922 "UEFI Shell ISO képfájlok letöltése"
 l "id-ID" "Indonesian (Bahasa Indonesia)" 0x0421
 v 3.22
 b "en-US"
-t MSG_355 "Aktifkan GPT (eksperimental)"
+t MSG_355 "Aktifkan GPT"
 t MSG_356 "Windows XP tidak dapat mengakses drive yang menggunakan skema partisi GPT.\n\nRufus tetap dapat membuat drive ini untuk digunakan di komputer lain. Lanjutkan hanya jika Anda membuat media yang dapat di-boot dengan EFI dan komputer tujuan mendukung UEFI.\n\nApakah Anda ingin melanjutkan?"
 t MSG_357 "Rufus"
 t MSG_358 "Pilih cara Rufus menulis citra ISOHybrid ini.\n\nYa - Mode ISO (disarankan)\nTidak - Mode Partisi Sistem EFI (ESP)"
@@ -6999,7 +6999,7 @@ t MSG_922 "Unduh Shell ISO UEFI"
 l "it-IT" "Italian (Italiano)" 0x0410, 0x0810
 v 4.5
 b "en-US"
-t MSG_355 "Abilita GPT (sperimentale)"
+t MSG_355 "Abilita GPT"
 t MSG_356 "Windows XP non può accedere alle unità che utilizzano lo schema di partizione GPT.\n\nRufus può comunque creare questa unità per l'utilizzo su un altro computer. Continuare solo se si sta creando un supporto avviabile EFI e il computer di destinazione supporta UEFI.\n\nContinuare?"
 t MSG_357 "Rufus"
 t MSG_358 "Scegliere come Rufus deve scrivere questa immagine ISOHybrid.\n\nSì - Modalità ISO (consigliata)\nNo - Modalità partizione di sistema EFI (ESP)"
@@ -7417,7 +7417,7 @@ t MSG_922 "Scarica le ISO della shell UEFI"
 l "ja-JP" "Japanese (日本語)" 0x0411
 v 4.5
 b "en-US"
-t MSG_355 "GPT を有効にする（試験的）"
+t MSG_355 "GPT を有効にする"
 t MSG_356 "Windows XP は GPT パーティション構成を使用するドライブにアクセスできません。\n\nRufus は、別のコンピューターで使用するためにこのドライブを作成できます。EFI ブートメディアを作成しており、対象のコンピューターが UEFI をサポートしている場合にのみ続行してください。\n\n続行しますか？"
 t MSG_357 "Rufus"
 t MSG_358 "Rufus でこの ISOHybrid イメージを書き込む方法を選択してください。\n\nはい - ISO モード（推奨）\nいいえ - EFI システム パーティション (ESP) モード"
@@ -7843,7 +7843,7 @@ t MSG_922 "UEFIシェルのISOをダウンロードします。"
 l "ko-KR" "Korean (한국어)" 0x0412
 v 4.5
 b "en-US"
-t MSG_355 "GPT 사용 (실험적)"
+t MSG_355 "GPT 사용"
 t MSG_356 "Windows XP에서는 GPT 파티션 구성을 사용하는 드라이브에 접근할 수 없습니다.\n\nRufus는 다른 컴퓨터에서 사용할 수 있도록 이 드라이브를 만들 수 있습니다. EFI 부팅 미디어를 만들고 있고 대상 컴퓨터가 UEFI를 지원하는 경우에만 계속하십시오.\n\n계속하시겠습니까?"
 t MSG_357 "Rufus"
 t MSG_358 "Rufus가 이 ISOHybrid 이미지를 기록할 방식을 선택하십시오.\n\n예 - ISO 모드(권장)\n아니요 - EFI 시스템 파티션(ESP) 모드"
@@ -8270,7 +8270,7 @@ t MSG_922 "UEFI Shell ISO 다운로드"
 l "lv-LV" "Latvian (Latviešu)" 0x0426
 v 4.5
 b "en-US"
-t MSG_355 "Iespējot GPT (eksperimentāli)"
+t MSG_355 "Iespējot GPT"
 t MSG_356 "Windows XP nevar piekļūt diskiem, kas izmanto GPT nodalījumu shēmu.\n\nRufus tomēr var izveidot šo disku lietošanai citā datorā. Turpiniet tikai tad, ja veidojat EFI sāknējamu datu nesēju un mērķa dators atbalsta UEFI.\n\nVai vēlaties turpināt?"
 t MSG_357 "Rufus"
 t MSG_358 "Izvēlieties, kā Rufus ierakstīs šo ISOHybrid attēlu.\n\nJā - ISO režīms (ieteicams)\nNē - EFI sistēmas nodalījuma (ESP) režīms"
@@ -8697,7 +8697,7 @@ t MSG_922 "Lejupielādē UEFI OS ISO failus"
 l "lt-LT" "Lithuanian (Lietuvių)" 0x0427
 v 3.22
 b "en-US"
-t MSG_355 "Įgalinti GPT (eksperimentinis)"
+t MSG_355 "Įgalinti GPT"
 t MSG_356 "Windows XP negali pasiekti diskų, kuriuose naudojama GPT skaidinių schema.\n\n„Rufus“ vis tiek gali sukurti šį diską naudojimui kitame kompiuteryje. Tęskite tik jei kuriate EFI įkrovos laikmeną ir paskirties kompiuteris palaiko UEFI.\n\nAr norite tęsti?"
 t MSG_357 "Rufus"
 t MSG_358 "Pasirinkite, kaip „Rufus“ turėtų įrašyti šį „ISOHybrid“ atvaizdą.\n\nTaip - ISO režimas (rekomenduojama)\nNe - EFI sistemos skaidinio (ESP) režimas"
@@ -9111,7 +9111,7 @@ t MSG_922 "Atsisiųskite UEFI Shell ISO"
 l "ms-MY" "Malay (Bahasa Malaysia)" 0x043e, 0x083e
 v 3.22
 b "en-US"
-t MSG_355 "Dayakan GPT (eksperimen)"
+t MSG_355 "Dayakan GPT"
 t MSG_356 "Windows XP tidak dapat mencapai pemacu yang menggunakan skema pembahagian GPT.\n\nRufus masih boleh mencipta pemacu ini untuk digunakan pada komputer lain. Teruskan hanya jika anda mencipta media boleh but EFI dan komputer sasaran menyokong UEFI.\n\nAdakah anda mahu meneruskan?"
 t MSG_357 "Rufus"
 t MSG_358 "Pilih cara Rufus harus menulis imej ISOHybrid ini.\n\nYa - Mod ISO (disyorkan)\nTidak - Mod Pembahagian Sistem EFI (ESP)"
@@ -9521,7 +9521,7 @@ t MSG_922 "Muat turun ISO Shell UEFI"
 l "nb-NO" "Norwegian (Norsk)" 0x0414
 v 4.5
 b "en-US"
-t MSG_355 "Aktiver GPT (eksperimentell)"
+t MSG_355 "Aktiver GPT"
 t MSG_356 "Windows XP har ikke tilgang til stasjoner som bruker GPT-partisjonsskjemaet.\n\nRufus kan likevel opprette denne stasjonen for bruk på en annen datamaskin. Fortsett bare hvis du lager et EFI-oppstartsmedium og måldatamaskinen støtter UEFI.\n\nVil du fortsette?"
 t MSG_357 "Rufus"
 t MSG_358 "Velg hvordan Rufus skal skrive dette ISOHybrid-avbildet.\n\nJa - ISO-modus (anbefalt)\nNei - EFI-systempartisjonsmodus (ESP)"
@@ -9939,7 +9939,7 @@ t MSG_922 "Last ned UEFI kommandolinje ISOer"
 l "fa-IR" "Persian (پارسی)" 0x0429
 v 4.5
 b "en-US"
-t MSG_355 "فعال‌سازی GPT (آزمایشی)"
+t MSG_355 "فعال‌سازی GPT"
 t MSG_356 "Windows XP نمی‌تواند به درایوهایی که از طرح پارتیشن GPT استفاده می‌کنند دسترسی پیدا کند.\n\nRufus همچنان می‌تواند این درایو را برای استفاده در رایانه‌ای دیگر ایجاد کند. فقط در صورتی ادامه دهید که در حال ساخت رسانهٔ قابل بوت EFI هستید و رایانهٔ مقصد از UEFI پشتیبانی می‌کند.\n\nآیا می‌خواهید ادامه دهید؟"
 t MSG_357 "Rufus"
 t MSG_358 "نحوهٔ نوشتن این تصویر ISOHybrid توسط Rufus را انتخاب کنید.\n\nبله - حالت ISO (پیشنهادی)\nخیر - حالت پارتیشن سیستمی EFI ‏(ESP)"
@@ -10769,7 +10769,7 @@ t MSG_346 "Ogranicz system Windows do trybu S (NIEZGODNY z obejściem konta onli
 t MSG_347 "Tryb eksperta"
 t MSG_348 "Wypakowywanie plików z archiwum: %s"
 t MSG_349 "Użyj Rufus MBR"
-t MSG_355 "Włącz GPT (eksperymentalne)"
+t MSG_355 "Włącz GPT"
 t MSG_356 "Windows XP nie może uzyskać dostępu do dysków korzystających ze schematu partycji GPT.\n\nRufus może mimo to utworzyć taki dysk do użycia na innym komputerze. Kontynuuj tylko wtedy, gdy tworzysz nośnik rozruchowy EFI, a komputer docelowy obsługuje UEFI.\n\nCzy chcesz kontynuować?"
 t MSG_357 "Rufus"
 t MSG_358 "Wybierz sposób zapisu obrazu ISOHybrid przez Rufusa.\n\nTak - tryb ISO (zalecany)\nNie - tryb partycji systemowej EFI (ESP)"
@@ -10797,7 +10797,7 @@ t MSG_922 "Ściągnij obrazy ISO UEFI Shell"
 l "pt-BR" "Portuguese Brazilian (Português do Brasil)" 0x0416
 v 4.5
 b "en-US"
-t MSG_355 "Habilitar GPT (experimental)"
+t MSG_355 "Habilitar GPT"
 t MSG_356 "O Windows XP não pode acessar unidades que usam o esquema de partição GPT.\n\nO Rufus ainda pode criar esta unidade para uso em outro computador. Continue somente se estiver criando uma mídia inicializável por EFI e o computador de destino for compatível com UEFI.\n\nDeseja continuar?"
 t MSG_357 "Rufus"
 t MSG_358 "Escolha como o Rufus deve gravar esta imagem ISOHybrid.\n\nSim - Modo ISO (recomendado)\nNão - Modo de Partição do Sistema EFI (ESP)"
@@ -11219,7 +11219,7 @@ t MSG_922 "Baixar ISOs do Shell UEFI"
 l "pt-PT" "Portuguese Standard (Português)" 0x0816
 v 4.5
 b "en-US"
-t MSG_355 "Ativar GPT (experimental)"
+t MSG_355 "Ativar GPT"
 t MSG_356 "O Windows XP não consegue aceder a unidades que utilizam o esquema de partições GPT.\n\nO Rufus pode ainda criar esta unidade para utilização noutro computador. Continue apenas se estiver a criar um suporte de arranque EFI e o computador de destino for compatível com UEFI.\n\nPretende continuar?"
 t MSG_357 "Rufus"
 t MSG_358 "Escolha como o Rufus deve gravar esta imagem ISOHybrid.\n\nSim - Modo ISO (recomendado)\nNão - Modo de partição de sistema EFI (ESP)"
@@ -11641,7 +11641,7 @@ t MSG_922 "Transferir ISOs de UEFI Shell"
 l "ro-RO" "Romanian (Română)" 0x0418, 0x0818
 v 4.5
 b "en-US"
-t MSG_355 "Activează GPT (experimental)"
+t MSG_355 "Activează GPT"
 t MSG_356 "Windows XP nu poate accesa unitățile care utilizează schema de partiționare GPT.\n\nRufus poate crea totuși această unitate pentru a fi utilizată pe alt calculator. Continuați numai dacă creați un suport de pornire EFI, iar calculatorul țintă acceptă UEFI.\n\nDoriți să continuați?"
 t MSG_357 "Rufus"
 t MSG_358 "Alegeți cum să scrie Rufus această imagine ISOHybrid.\n\nDa - Mod ISO (recomandat)\nNu - Mod partiție de sistem EFI (ESP)"
@@ -12066,7 +12066,7 @@ t MSG_922 "Descarcă UEFI Shell ISO-uri"
 l "ru-RU" "Russian (Русский)" 0x0419, 0x0819
 v 4.5
 b "en-US"
-t MSG_355 "Включить GPT (экспериментально)"
+t MSG_355 "Включить GPT"
 t MSG_356 "Windows XP не может получить доступ к накопителям с таблицей разделов GPT.\n\nRufus всё равно может создать такой накопитель для использования на другом компьютере. Продолжайте только при создании загрузочного носителя EFI, если целевой компьютер поддерживает UEFI.\n\nПродолжить?"
 t MSG_357 "Rufus"
 t MSG_358 "Выберите, как Rufus должен записать этот ISOHybrid-образ.\n\nДа — режим ISO (рекомендуется)\nНет — режим системного раздела EFI (ESP)"
@@ -12499,7 +12499,7 @@ t MSG_922 "Загрузка ISO-образов оболочки UEFI"
 l "sr-RS" "Serbian (Srpski)" 0x241a, 0x081a, 0x181a, 0x2c1a, 0x701a, 0x7c1a
 v 4.5
 b "en-US"
-t MSG_355 "Omogući GPT (eksperimentalno)"
+t MSG_355 "Omogući GPT"
 t MSG_356 "Windows XP ne može da pristupi uređajima koji koriste GPT particionu šemu.\n\nRufus ipak može da napravi ovaj uređaj za korišćenje na drugom računaru. Nastavite samo ako pravite EFI pokretački medijum i ciljni računar podržava UEFI.\n\nŽelite li da nastavite?"
 t MSG_357 "Rufus"
 t MSG_358 "Izaberite kako Rufus treba da upiše ovu ISOHybrid sliku.\n\nDa - ISO režim (preporučeno)\nNe - režim EFI sistemske particije (ESP)"
@@ -12924,7 +12924,7 @@ t MSG_922 "Preuzmite UEFI Shell ISOs"
 l "sk-SK" "Slovak (Slovensky)" 0x041B
 v 4.5
 b "en-US"
-t MSG_355 "Povoliť GPT (experimentálne)"
+t MSG_355 "Povoliť GPT"
 t MSG_356 "Windows XP nemôže pristupovať k jednotkám, ktoré používajú schému oblastí GPT.\n\nRufus napriek tomu môže vytvoriť túto jednotku na použitie v inom počítači. Pokračujte iba vtedy, ak vytvárate zavádzacie médium EFI a cieľový počítač podporuje UEFI.\n\nChcete pokračovať?"
 t MSG_357 "Rufus"
 t MSG_358 "Vyberte, ako má Rufus zapísať tento obraz ISOHybrid.\n\nÁno - Režim ISO (odporúčaný)\nNie - Režim systémovej oblasti EFI (ESP)"
@@ -13349,7 +13349,7 @@ t MSG_922 "Stiahnite UEFI Shell ISO"
 l "sl-SI" "Slovenian (Slovenščina)" 0x0424
 v 4.5
 b "en-US"
-t MSG_355 "Omogoči GPT (poskusno)"
+t MSG_355 "Omogoči GPT"
 t MSG_356 "Windows XP ne more dostopati do pogonov, ki uporabljajo shemo particij GPT.\n\nRufus lahko kljub temu ustvari ta pogon za uporabo v drugem računalniku. Nadaljujte samo, če ustvarjate zagonski medij EFI in ciljni računalnik podpira UEFI.\n\nAli želite nadaljevati?"
 t MSG_357 "Rufus"
 t MSG_358 "Izberite, kako naj Rufus zapiše to sliko ISOHybrid.\n\nDa - način ISO (priporočeno)\nNe - način sistemske particije EFI (ESP)"
@@ -13776,7 +13776,7 @@ t MSG_922 "Prenos UEFI Shell ISOs"
 l "es-ES" "Spanish (Español)" 0x040a, 0x080a, 0x0c0a, 0x100a, 0x140a, 0x180a, 0x1c0a, 0x200a, 0x240a, 0x280a, 0x2c0a, 0x300a, 0x340a, 0x380a, 0x3c0a, 0x400a, 0x440a, 0x480a, 0x4c0a, 0x500a, 0x540a, 0x580a
 v 4.5
 b "en-US"
-t MSG_355 "Habilitar GPT (experimental)"
+t MSG_355 "Habilitar GPT"
 t MSG_356 "Windows XP no puede acceder a unidades que utilizan el esquema de particiones GPT.\n\nRufus puede crear la unidad para utilizarla en otro equipo. Continúe únicamente si está creando un medio de arranque EFI y el equipo de destino es compatible con UEFI.\n\n¿Desea continuar?"
 t MSG_357 "Rufus"
 t MSG_358 "Elija cómo debe escribir Rufus esta imagen ISOHybrid.\n\nSí - Modo ISO (recomendado)\nNo - Modo de partición del sistema EFI (ESP)"
@@ -14194,7 +14194,7 @@ t MSG_922 "Descargar ISO de UEFI Shell"
 l "sv-SE" "Swedish (Svenska)" 0x041d, 0x081d
 v 4.5
 b "en-US"
-t MSG_355 "Aktivera GPT (experimentellt)"
+t MSG_355 "Aktivera GPT"
 t MSG_356 "Windows XP kan inte komma åt enheter som använder GPT-partitionsschemat.\n\nRufus kan ändå skapa den här enheten för användning på en annan dator. Fortsätt endast om du skapar ett EFI-startmedium och måldatorn stöder UEFI.\n\nVill du fortsätta?"
 t MSG_357 "Rufus"
 t MSG_358 "Välj hur Rufus ska skriva den här ISOHybrid-avbildningen.\n\nJa - ISO-läge (rekommenderas)\nNej - EFI-systempartitionsläge (ESP)"
@@ -14612,7 +14612,7 @@ t MSG_922 "Ladda ner UEFI-skal ISO-filer"
 l "th-TH" "Thai (ไทย)" 0x041e
 v 4.5
 b "en-US"
-t MSG_355 "เปิดใช้งาน GPT (รุ่นทดลอง)"
+t MSG_355 "เปิดใช้งาน GPT"
 t MSG_356 "Windows XP ไม่สามารถเข้าถึงไดรฟ์ที่ใช้รูปแบบพาร์ติชัน GPT ได้\n\nRufus ยังสามารถสร้างไดรฟ์นี้เพื่อใช้กับคอมพิวเตอร์เครื่องอื่นได้ ดำเนินการต่อเฉพาะเมื่อคุณกำลังสร้างสื่อบูต EFI และคอมพิวเตอร์เป้าหมายรองรับ UEFI เท่านั้น\n\nคุณต้องการดำเนินการต่อหรือไม่?"
 t MSG_357 "Rufus"
 t MSG_358 "เลือกวิธีที่ Rufus จะเขียนอิมเมจ ISOHybrid นี้\n\nใช่ - โหมด ISO (แนะนำ)\nไม่ - โหมดพาร์ติชันระบบ EFI (ESP)"
@@ -15033,7 +15033,7 @@ t MSG_922 "ดาวน์โหลดไฟล์ ISO ของ UEFI Shell"
 l "tr-TR" "Turkish (Türkçe)" 0x041F
 v 4.5
 b "en-US"
-t MSG_355 "GPT'yi etkinleştir (deneysel)"
+t MSG_355 "GPT'yi etkinleştir"
 t MSG_356 "Windows XP, GPT bölüm düzenini kullanan sürücülere erişemez.\n\nRufus bu sürücüyü başka bir bilgisayarda kullanılmak üzere yine de oluşturabilir. Yalnızca EFI önyüklenebilir medya oluşturuyorsanız ve hedef bilgisayar UEFI'yi destekliyorsa devam edin.\n\nDevam etmek istiyor musunuz?"
 t MSG_357 "Rufus"
 t MSG_358 "Rufus'un bu ISOHybrid kalıbını nasıl yazacağını seçin.\n\nEvet - ISO modu (önerilen)\nHayır - EFI Sistem Bölümü (ESP) modu"
@@ -15458,7 +15458,7 @@ t MSG_922 "UEFI Shell ISO'larını indirin"
 l "uk-UA" "Ukrainian (Українська)" 0x0422
 v 4.5
 b "en-US"
-t MSG_355 "Увімкнути GPT (експериментально)"
+t MSG_355 "Увімкнути GPT"
 t MSG_356 "Windows XP не може отримати доступ до накопичувачів зі схемою розділів GPT.\n\nRufus усе одно може створити такий накопичувач для використання на іншому комп’ютері. Продовжуйте лише для створення завантажувального носія EFI, якщо цільовий комп’ютер підтримує UEFI.\n\nПродовжити?"
 t MSG_357 "Rufus"
 t MSG_358 "Виберіть, як Rufus має записати цей образ ISOHybrid.\n\nТак — режим ISO (рекомендовано)\nНі — режим системного розділу EFI (ESP)"
@@ -15890,7 +15890,7 @@ t MSG_922 "Завантаження командної оболонки UEFI ISO
 l "vi-VN" "Vietnamese (Tiếng Việt)" 0x042A
 v 4.5
 b "en-US"
-t MSG_355 "Bật GPT (thử nghiệm)"
+t MSG_355 "Bật GPT"
 t MSG_356 "Windows XP không thể truy cập các ổ đĩa sử dụng sơ đồ phân vùng GPT.\n\nRufus vẫn có thể tạo ổ đĩa này để sử dụng trên một máy tính khác. Chỉ tiếp tục nếu bạn đang tạo phương tiện khởi động EFI và máy tính đích hỗ trợ UEFI.\n\nBạn có muốn tiếp tục không?"
 t MSG_357 "Rufus"
 t MSG_358 "Chọn cách Rufus ghi ảnh ISOHybrid này.\n\nCó - Chế độ ISO (khuyến nghị)\nKhông - Chế độ phân vùng hệ thống EFI (ESP)"

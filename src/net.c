@@ -60,7 +60,6 @@
 #define WININET_TLS11_FLAG 0x00000200
 #define WININET_TLS12_FLAG 0x00000800
 #define WININET_TLS13_FLAG 0x00002000
-static BOOL tls_restart_required;
 #ifndef INTERNET_OPEN_TYPE_DIRECT
 #define INTERNET_OPEN_TYPE_DIRECT               1
 #endif
@@ -248,7 +247,14 @@ static HINTERNET GetInternetSession(const char* user_agent, BOOL bRetry)
 	HINTERNET hSession = NULL;
 	HRESULT hr = S_FALSE;
 	INetworkListManager* pNetworkListManager;
+	/*
 	if (tls_restart_required || !(dwProtocols & WININET_TLS12_FLAG)) {
+		SetLastError(ERROR_INTERNET_SECURITY_CHANNEL_ERROR);
+		return NULL;
+	} */
+	// I will re-allow TLS 1.0. TLS 1.2 checks for Fido are in place, so it should be fine for the most part.
+	if (tls_restart_required ||
+		!(dwProtocols & (WININET_TLS10_FLAG | WININET_TLS12_FLAG))) {
 		SetLastError(ERROR_INTERNET_SECURITY_CHANNEL_ERROR);
 		return NULL;
 	}
@@ -359,6 +365,12 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 	hSession = GetInternetSession(user_agent, TRUE);
 	if (hSession == NULL) {
 		uprintf("Could not open Internet session: %s", WindowsErrorString());
+		if (WindowsVersion.Version == WINDOWS_VISTA) {
+			uprintf("Make sure KB4019276 or later is installed, and that TLS 1.2 is enabled in Internet Options.");
+		}
+		if (WindowsVersion.Version >= WINDOWS_7) {
+			uprintf("Make sure TLS 1.2 is enabled in Internet Options.");
+		}
 		goto out;
 	}
 

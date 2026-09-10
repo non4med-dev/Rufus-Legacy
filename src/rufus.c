@@ -129,6 +129,7 @@ BOOL is_x86_64, use_own_c32[NB_OLD_C32] = { FALSE, FALSE }, mbr_selected_by_user
 BOOL op_in_progress = TRUE, right_to_left_mode = FALSE, has_uefi_csm = FALSE, its_a_me_mario = FALSE;
 BOOL enable_HDDs = FALSE, enable_VHDs = TRUE, enable_ntfs_compression = FALSE, no_confirmation_on_cancel = FALSE;
 BOOL advanced_mode_device, advanced_mode_format, allow_dual_uefi_bios, detect_fakes, enable_vmdk, force_large_fat32;
+BOOL enable_windows_to_go = TRUE;
 BOOL usb_debug, use_fake_units, preserve_timestamps = FALSE, fast_zeroing = FALSE, app_changed_size = FALSE;
 BOOL zero_drive = FALSE, list_non_usb_removable_drives = FALSE, enable_file_indexing, large_drive = FALSE;
 BOOL write_as_image = FALSE, write_as_esp = FALSE, use_vds = FALSE, ignore_boot_marker = FALSE;
@@ -1289,6 +1290,9 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 	// produces DBT_DEVNODES_CHANGED messages that lead to unwanted device
 	// refreshes. So make sure to ignore DBT_DEVNODES_CHANGED while scanning.
 	dont_process_dbt_devnodes = TRUE;
+	// Preserve extracted Windows To Go WIM when the same ISO is detected
+	if (!IsWinToGoTempCurrent(image_path))
+		CleanupWinToGoTemp();
 	if (image_path == NULL)
 		goto out;
 	PrintInfoDebug(0, MSG_202);
@@ -1297,13 +1301,16 @@ DWORD WINAPI ImageScanThread(LPVOID param)
 	memset(&img_report, 0, sizeof(img_report));
 	img_report.is_iso = (BOOLEAN)ExtractISO(image_path, "", TRUE);
 	img_report.is_bootable_img = IsBootableImage(image_path);
-	if (img_report.wininst_index > 0 || img_report.is_windows_img)
+	// Add Windows To Go setting check to the delay (port)
+	if (enable_windows_to_go && (img_report.wininst_index > 0 || img_report.is_windows_img) &&
+		(WindowsVersion.Version >= WINDOWS_8 || img_report.is_windows_img))
 		PopulateWindowsVersion();
 	ComboBox_ResetContent(hImageOption);
 	imop_win_sel = 0;
 
 	if ((ErrorStatus == RUFUS_ERROR(ERROR_CANCELLED)) || (img_report.image_size == 0) ||
-		(!img_report.is_iso && (img_report.is_bootable_img <= 0) && !img_report.is_windows_img)) {
+		(!img_report.is_iso && (img_report.is_bootable_img <= 0) && !img_report.is_windows_img) ||
+		(img_report.is_windows_img && !enable_windows_to_go)) {
 		// Failed to scan image
 		if (img_report.is_bootable_img < 0)
 			MessageBoxExU(hMainDialog, lmprintf(MSG_322, image_path), lmprintf(MSG_042), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
@@ -1522,7 +1529,9 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 				goto out;
 			}
 			if (SelectedDrive.MediaType != FixedMedia) {
-				if ((target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT) && (WindowsVersion.BuildNumber < 15000)) {
+				// Use our own staged partitioning for Windows To Go (port)
+				if ((WindowsVersion.Version >= WINDOWS_8) && (target_type == TT_UEFI) &&
+					(partition_type == PARTITION_STYLE_GPT) && (WindowsVersion.BuildNumber < 15000)) {
 					// Up to Windows 10 Creators Update (1703), we were screwed, since we need access to 2 partitions at the same time.
 					// Thankfully, the newer Windows allow mounting multiple partitions on the same REMOVABLE drive.
 					MessageBoxExU(hMainDialog, lmprintf(MSG_198), lmprintf(MSG_190), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
@@ -1998,16 +2007,20 @@ uefi_target:
 	if (boot_type == BT_UEFI_NTFS) {
 		fs_type = (int)ComboBox_GetCurItemData(hFileSystem);
 		if (fs_type != FS_NTFS && fs_type != FS_EXFAT) {
-			MessageBoxExU(hMainDialog, lmprintf(MSG_097, "UEFI:NTFS"), lmprintf(MSG_092), MB_OK|MB_ICONERROR|MB_IS_RTL, selected_langid);
+			MessageBoxExU(hMainDialog, lmprintf(MSG_097, "UEFI:NTFS"), lmprintf(MSG_092), MB_OK | MB_ICONERROR | MB_IS_RTL, selected_langid);
 			goto out;
 		}
 	}
 	ret = BOOTCHECK_PROCEED;
 
 out:
+	// Clean. Up. My. Damn. Windows To Go. (port)
+	if (ret != BOOTCHECK_PROCEED || !is_windows_to_go)
+		CleanupWinToGoTemp();
 	PostMessage(hMainDialog, UM_FORMAT_START, ret, 0);
 	ExitThread((DWORD)ret);
 }
+
 
 static __inline const char* IsAlphaOrBeta(void)
 {
@@ -2831,9 +2844,11 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		}
 		EnableControls(TRUE, FALSE);
 		UpdateImage(FALSE);
+		// Yeah you're right, we don't either.
+		/*
 		// The AppStore version does not need the internal check for updates
 		if (!appstore_version)
-			CheckForUpdates(FALSE);
+			CheckForUpdates(FALSE); */
 		// Register MEDIA_INSERTED/MEDIA_REMOVED notifications for card readers
 		if (SUCCEEDED(SHGetSpecialFolderLocation(0, CSIDL_DESKTOP, &pidlDesktop))) {
 			NotifyEntry.pidl = pidlDesktop;
@@ -3144,6 +3159,8 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		if (format_thread != NULL)
 			break;
 	aborted_start:
+		// Clean up Windows To Go when canceled, before formatting starts (port)
+		CleanupWinToGoTemp();
 		zero_drive = FALSE;
 		if (queued_hotplug_event)
 			SendMessage(hDlg, UM_MEDIA_CHANGE, 0, 0);
@@ -3162,6 +3179,7 @@ static INT_PTR CALLBACK MainCallback(HWND hDlg, UINT message, WPARAM wParam, LPA
 		// Fall through
 
 	case UM_FORMAT_COMPLETED:
+		CleanupWinToGoTemp();
 		zero_drive = FALSE;
 		format_thread = NULL;
 		if (unattend_xml_path != NULL) {
@@ -3398,7 +3416,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// For all other DLLs, use SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32),
 	// though this *STILL* does not prevent the Windows default of looking for DLLs in the
 	// current directories.
-	SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
+
+	// Windows Vista's implementation is FUCKING ASS.
+	// It's the reason theming broke on Vista in the last release (port)
+	if (WindowsVersion.Version >= WINDOWS_7)
+		SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 
 	uprintf("*** " APPLICATION_NAME " init ***\n");
 	its_a_me_mario = GetUserNameA((char*)(uintptr_t)&u, &size) && (u == 7104878);
@@ -3695,6 +3717,13 @@ skip_args_processing:
 	enable_vmdk = ReadSettingBool(SETTING_ENABLE_VMDK_DETECTION);
 	enable_file_indexing = ReadSettingBool(SETTING_ENABLE_FILE_INDEXING);
 	enable_VHDs = !ReadSettingBool(SETTING_DISABLE_VHDS);
+	// Test #1
+	enable_windows_to_go = (WindowsVersion.Version > WINDOWS_2000) &&
+		((WindowsVersion.Version >= WINDOWS_8) ||
+			!ReadSettingBool(SETTING_DISABLE_WINDOWS_TO_GO));
+	// enable_windows_to_go = (WindowsVersion.Version >= WINDOWS_8) ||
+		// !ReadSettingBool(SETTING_DISABLE_WINDOWS_TO_GO);
+
 	enable_extra_hashes = ReadSettingBool(SETTING_ENABLE_EXTRA_HASHES);
 	expert_mode = ReadSettingBool(SETTING_EXPERT_MODE);
 	ignore_boot_marker = ReadSettingBool(SETTING_IGNORE_BOOT_MARKER);
@@ -3792,7 +3821,7 @@ skip_args_processing:
 		get_loc_data_file(loc_file, selected_locale);
 		right_to_left_mode = ((selected_locale->ctrl_id) & LOC_RIGHT_TO_LEFT);
 		// Set MB_SYSTEMMODAL to prevent Far Manager from stealing focus...
-		MessageBoxExU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP|MB_IS_RTL|MB_SYSTEMMODAL, selected_langid);
+		MessageBoxExU(NULL, lmprintf(MSG_002), lmprintf(MSG_001), MB_ICONSTOP | MB_IS_RTL | MB_SYSTEMMODAL, selected_langid);
 		goto out;
 	}
 
@@ -3805,34 +3834,6 @@ skip_args_processing:
 	// Some dialogs have Rich Edit controls and won't display without this
 	if (GetLibraryHandle("Riched20") == NULL)
 		uprintf("Could not load RichEdit library - some dialogs may not display: %s", WindowsErrorString());
-
-	// Increase the application privileges (SE_DEBUG_PRIVILEGE), so that we can report
-	// the Windows Services preventing access to the disk or volume we want to format.
-	EnablePrivileges();
-
-	// We use local group policies rather than direct registry manipulation
-	// 0x9e disables removable and fixed drive notifications
-	lgp_set = SetLGP(FALSE, &existing_key, ep_reg, "NoDriveTypeAutorun", 0x9e);
-
-	// Skip AutoMount manipulation on NT5 (port)
-	if (WindowsVersion.Version > WINDOWS_XP) {
-		// Re-enable AutoMount if needed
-		if (!GetAutoMount(&automount)) {
-			uprintf("Could not get AutoMount status");
-			automount = TRUE;	// So that we don't try to change its status on exit
-		} else if (!automount) {
-			uprintf("AutoMount was detected as disabled - temporarily re-enabling it");
-			if (!SetAutoMount(TRUE))
-				uprintf("Failed to enable AutoMount");
-		}
-	}
-
-	// Detect CPU acceleration for SHA-1/SHA-256
-	cpu_has_sha1_accel = DetectSHA1Acceleration();
-	cpu_has_sha256_accel = DetectSHA256Acceleration();
-	// FFU support started with Windows 10 1709 (through FfuProvider.dll)
-	static_sprintf(tmp_path, "%s\\dism\\FfuProvider.dll", sysnative_dir);
-	has_ffu_support = (_accessU(tmp_path, 0) == 0);
 
 relaunch:
 	ubprintf("Localization set to '%s'", selected_locale->txt[0]);
@@ -4285,6 +4286,7 @@ extern int TestHashes(void);
 	}
 
 out:
+	CleanupWinToGoTemp();
 	_chdirU(cur_dir);
 	// Destroy the hogger mutex first, so that the cmdline app can exit and we can delete it
 	if (hogmutex != NULL) {
