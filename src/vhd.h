@@ -190,8 +190,9 @@ extern uint8_t WimExtractCheck(BOOL bSilent);
 extern BOOL WimExtractFile(const char* wim_image, int index, const char* src, const char* dst, BOOL bSilent);
 extern BOOL WimExtractFile_API(const char* image, int index, const char* src, const char* dst, BOOL bSilent);
 extern BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst, BOOL bSilent);
-// Define WimExtractMetadata for the Windows To Go fallback (port)
 extern BOOL WimExtractMetadata(const char* image, const char* dst, BOOL bSilent);
+extern BOOL WimJoinSplitImage(const char* directory, const char* output_name,
+	const char* part_stem, uint16_t part_count);
 extern BOOL WimApplyImage(const char* image, int index, const char* dst);
 extern char* WimMountImage(const char* image, int index);
 extern BOOL WimUnmountImage(const char* image, int index, BOOL commit);
