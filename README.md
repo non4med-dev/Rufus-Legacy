@@ -20,15 +20,14 @@ Features
 - Create BIOS or UEFI bootable drives, including [UEFI bootable NTFS](https://github.com/pbatard/uefi-ntfs) (Windows 2000+)<br>
 - Create bootable drives from bootable ISOs (Windows, Linux, etc.) (Windows 2000+)<br>
 - Create bootable drives from bootable disk images, including compressed ones (Windows 2000+)<br>
+- Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives (Windows XP+)
 - Create VHD/DD (Windows 2000+), VHDX (Windows 8+) and FFU (Windows 10 1709+) images of an existing drive<br>
 - Create persistent Linux partitions (Windows 2000+)<br>
 - Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image (Windows 2000+)<br>
-- Perform runtime validation of UEFI bootable media (Windows 2000+) (Check readme!!)<br>
+- Perform runtime validation of UEFI bootable media (Windows 2000+)<br>
 - Perform bad blocks checks, including detection of "fake" flash drives (Windows 2000+)<br>
 - Download official Microsoft Windows 8, Windows 10 or Windows 11 retail ISOs (Windows 7+)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-> (WARNING: On Windows 7 [Powershell 7.2](https://github.com/PowerShell/PowerShell/releases/tag/v7.2.24) must be installed for ISO downloading to work)<br>
-- Download [UEFI Shell](https://github.com/pbatard/UEFI-Shell) ISOs (Windows 7+)<br>
-- Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives (Windows 8+) (Windows XP+ planned for the next update)<br>
 
 Changes
 --------
@@ -52,9 +51,8 @@ More about the project
 ----------------------
 Rufus-Legacy is based on Rufus 4.7.2231 (released April 9, 2025). It's the last version of Rufus to compile with Visual Studio 2022 17.6 and use a non-WIMlib base, which older operating systems don't benefit from.
 
-Newer releases of Rufus-Legacy will slowly and selectively implement features found in newer versions of Rufus, for example attempting to experimentally backport support for creating Windows To Go drives, which currently rely on components introduced in Windows 8.
+Newer releases of Rufus-Legacy will slowly and selectively implement features found in newer versions of Rufus, keeping 4.7 as a base.
 
-Basing Rufus-Legacy on a single stable build lets me focus on adding proper support and optimizations for legacy platforms, ensuring reliability the same way the original project does.<br>
 Over time I'll attempt to make this project more independent from the upstream main branch so it can focus entirely on features older OSes can actually benefit from.
 
 AI Disclaimer
