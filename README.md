@@ -53,8 +53,8 @@ Future Plans
 - Take advantage of libwim being present by porting "Windows User Experience" options
 - Port libwim to Windows 2000, and possibly integrate it into Rufus itself for a more 'seemless' experience
 - Update GRUB, UEFI:NTFS to their newest versions
-- Fix rufus' own update checks and enable them for Win8+ (not a priority)
-&nbsp;&nbsp;&nbsp;- I work around the code, but the project serves no real purpose on Windows 8 anyways. What am I doing?
+- Fix rufus' own update checks and enable them for Win8+ (not a priority)<br>
+&nbsp;&nbsp;&nbsp;- I work around the code instead of replacing it, but the project serves no real purpose on modern Windows anyway. What am I doing?
 
 More about the project
 ----------------------
