@@ -47,6 +47,15 @@ Changes
 - Original code paths have been retained for natively supported Windows versions (so nothing breaks!)<br>
 Note: Rufus-Legacy mostly creates OS-specific fallbacks rather than replacing original code
 
+Future Plans
+------------
+- Merge the new DBX paths (hopefully XP accepts KEK2023)
+- Take advantage of libwim being present by porting "Windows User Experience" options
+- Port libwim to Windows 2000, and possibly integrate it into Rufus itself for a more 'seemless' experience
+- Update GRUB, UEFI:NTFS to their newest versions
+- Fix rufus' own update checks and enable them for Win8+ (not a priority)
+&nbsp;&nbsp;&nbsp;- I work around the code, but the project serves no real purpose on Windows 8 anyways. What am I doing?
+
 More about the project
 ----------------------
 Rufus-Legacy is based on Rufus 4.7.2231 (released April 9, 2025). It's the last version of Rufus to compile with Visual Studio 2022 17.6 and use a non-WIMlib base, which older operating systems don't benefit from.
