@@ -1472,17 +1472,31 @@ out:
 int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_file, DWORD attributes)
 {
 	size_t i;
+	size_t nb;
 	ssize_t read_size;
 	int64_t file_length, r = 0;
-	char buf[UDF_BLOCKSIZE];
+	uint8_t* buf = NULL;
 	DWORD buf_size, wr_size;
 	iso9660_t* p_iso = NULL;
 	udf_t* p_udf = NULL;
-	udf_dirent_t *p_udf_root = NULL, *p_udf_file = NULL;
-	iso9660_stat_t *p_statbuf = NULL;
+	udf_dirent_t* p_udf_root = NULL, * p_udf_file = NULL;
+	iso9660_stat_t* p_statbuf = NULL;
 	lsn_t lsn;
 	HANDLE file_handle = INVALID_HANDLE_VALUE;
 
+	/*
+	file_handle = CreateFileU(dest_file, GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_READ, NULL, CREATE_ALWAYS, attributes, NULL);
+	if (file_handle == INVALID_HANDLE_VALUE) {
+		uprintf("  Could not create file %s: %s", dest_file, WindowsErrorString());
+		goto out;
+	}
+	*/
+
+	// Use the regular ISO buffer for Windows To Go (port)
+	buf = (uint8_t*)malloc(ISO_BUFFER_SIZE);
+	if (buf == NULL)
+		goto out;
 	file_handle = CreateFileU(dest_file, GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ, NULL, CREATE_ALWAYS, attributes, NULL);
 	if (file_handle == INVALID_HANDLE_VALUE) {
@@ -1505,8 +1519,16 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 		uprintf("Could not locate file %s in ISO image", iso_file);
 		goto out;
 	}
+
 	file_length = udf_get_file_length(p_udf_file);
 	while (file_length > 0) {
+		// Windows To Go; Stop WIM extraction and delete partial files
+		if (IS_ERROR(ErrorStatus) && SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
+			r = 0;
+			goto out;
+		}
+		nb = (size_t)MIN(ISO_BUFFER_SIZE / UDF_BLOCKSIZE,
+			(file_length + UDF_BLOCKSIZE - 1) / UDF_BLOCKSIZE);
 		memset(buf, 0, UDF_BLOCKSIZE);
 		read_size = udf_read_block(p_udf_file, buf, 1);
 		if (read_size < 0) {
@@ -1522,6 +1544,7 @@ int64_t ExtractISOFile(const char* iso, const char* iso_file, const char* dest_f
 		r += buf_size;
 	}
 	goto out;
+
 
 try_iso:
 	// Make sure to enable extensions, else we may not match the name of the file we are looking
@@ -1540,6 +1563,14 @@ try_iso:
 
 	file_length = p_statbuf->total_size;
 	for (i = 0; file_length > 0; i++) {
+		// Windows To Go same shit for ISO9660
+		if (IS_ERROR(ErrorStatus) && SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
+			r = 0;
+			goto out;
+		}
+		nb = (size_t)MIN(ISO_BUFFER_SIZE / ISO_BLOCKSIZE,
+			(file_length + ISO_BLOCKSIZE - 1) / ISO_BLOCKSIZE);
+		memset(buf, 0, ISO_BUFFER_SIZE);
 		memset(buf, 0, ISO_BLOCKSIZE);
 		lsn = p_statbuf->lsn + (lsn_t)i;
 		if (iso9660_iso_seek_read(p_iso, buf, lsn, 1) != ISO_BLOCKSIZE) {

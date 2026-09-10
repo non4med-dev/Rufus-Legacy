@@ -116,7 +116,8 @@
 #define FAT32_CLUSTER_THRESHOLD     1.011f		// For FAT32, cluster size changes don't occur at power of 2 boundaries but slightly above
 #define DD_BUFFER_SIZE              (32 * MB)	// Minimum size of buffer to use for DD operations
 #define UBUFFER_SIZE                4096
-#define ISO_BUFFER_SIZE             (64 * KB)	// Buffer size used for ISO data extraction
+// Set ISO buffer size from 64kb to 1mb (port)
+#define ISO_BUFFER_SIZE             (1 * MB)	// Buffer size used for ISO data extraction
 #define RSA_SIGNATURE_SIZE          256
 #define CBN_SELCHANGE_INTERNAL      (CBN_SELCHANGE + 256)
 #if defined(RUFUS_TEST)
@@ -724,7 +725,7 @@ extern HWND hNBPasses, hLog, hInfo, hProgress;
 extern WORD selected_langid;
 extern DWORD ErrorStatus, DownloadStatus, MainThreadId, LastWriteError;
 extern BOOL use_own_c32[NB_OLD_C32], detect_fakes, op_in_progress, right_to_left_mode;
-extern BOOL allow_dual_uefi_bios, large_drive, usb_debug;
+extern BOOL allow_dual_uefi_bios, enable_windows_to_go, large_drive, usb_debug;
 extern uint8_t image_options, *pe256ssp;
 extern uint16_t rufus_version[3], embedded_sl_version[2];
 extern uint32_t pe256ssp_size;
@@ -909,33 +910,77 @@ extern HMODULE  OpenedLibrariesHandle[MAX_LIBRARY_HANDLES];
 extern uint16_t OpenedLibrariesHandleSize;
 #define         OPENED_LIBRARIES_VARS HMODULE OpenedLibrariesHandle[MAX_LIBRARY_HANDLES]; uint16_t OpenedLibrariesHandleSize = 0
 #define         CLOSE_OPENED_LIBRARIES while(OpenedLibrariesHandleSize > 0) FreeLibrary(OpenedLibrariesHandle[--OpenedLibrariesHandleSize])
-static __inline HMODULE GetLibraryHandle(char* szLibraryName) {
+
+static __inline HMODULE GetLibraryHandle(char* szLibraryName)
+{
 	HMODULE h = NULL;
 	wchar_t* wszLibraryName = NULL;
+	wchar_t wszSystemPath[MAX_PATH];
+	DWORD path_length, load_error = ERROR_SUCCESS;
+	size_t name_length;
 	int size;
-	if (szLibraryName == NULL || szLibraryName[0] == 0)
+
+	if ((szLibraryName == NULL) || (szLibraryName[0] == 0))
 		goto out;
+
 	size = MultiByteToWideChar(CP_UTF8, 0, szLibraryName, -1, NULL, 0);
-	if ((size <= 1) || ((wszLibraryName = (wchar_t*)calloc(size, sizeof(wchar_t))) == NULL) ||
-		(MultiByteToWideChar(CP_UTF8, 0, szLibraryName, -1, wszLibraryName, size) != size))
+	if ((size <= 1) ||
+		((wszLibraryName = (wchar_t*)calloc(size, sizeof(wchar_t))) == NULL) ||
+		(MultiByteToWideChar(CP_UTF8, 0, szLibraryName, -1,
+			wszLibraryName, size) != size))
 		goto out;
-	// If the library is already opened, just return a handle (that doesn't need to be freed)
-	if ((h = GetModuleHandleW(wszLibraryName)) != NULL)
+
+	h = GetModuleHandleW(wszLibraryName);
+	if (h != NULL)
 		goto out;
-	// Sanity check
+
 	if (OpenedLibrariesHandleSize >= MAX_LIBRARY_HANDLES) {
 		uprintf("Error: MAX_LIBRARY_HANDLES is too small\n");
 		goto out;
 	}
-	h = LoadLibraryExW(wszLibraryName, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
-	if (h != NULL)
+
+	h = LoadLibraryExW(wszLibraryName, NULL,
+		LOAD_LIBRARY_SEARCH_SYSTEM32);
+	load_error = GetLastError();
+
+	// Load RichEdit before dialogs draw it
+	if ((h == NULL) &&
+		(load_error == ERROR_INVALID_PARAMETER) &&
+		((wcscmp(wszLibraryName, L"Riched20") == 0) ||
+			(wcscmp(wszLibraryName, L"Riched20.dll") == 0))) {
+		path_length = GetSystemDirectoryW(wszSystemPath,
+			ARRAYSIZE(wszSystemPath));
+		name_length = wcslen(L"\\Riched20.dll");
+
+		if ((path_length != 0) &&
+			(path_length < ARRAYSIZE(wszSystemPath)) &&
+			(path_length + name_length + 1 <= ARRAYSIZE(wszSystemPath))) {
+			memcpy(&wszSystemPath[path_length], L"\\Riched20.dll",
+				(name_length + 1) * sizeof(wchar_t));
+
+			h = LoadLibraryW(wszSystemPath);
+			if (h == NULL)
+				load_error = GetLastError();
+		}
+		else {
+			load_error = ERROR_INSUFFICIENT_BUFFER;
+		}
+	}
+
+	if (h != NULL) {
 		OpenedLibrariesHandle[OpenedLibrariesHandleSize++] = h;
-	else
-		uprintf("Unable to load '%S.dll': %s", wszLibraryName, WindowsErrorString());
+	}
+	else {
+		SetLastError(load_error);
+		uprintf("Unable to load '%S': %s",
+			wszLibraryName, WindowsErrorString());
+	}
+
 out:
 	free(wszLibraryName);
 	return h;
 }
+
 #define PF_TYPE(api, ret, proc, args)		typedef ret (api *proc##_t)args
 #define PF_DECL(proc)						static proc##_t pf##proc = NULL
 #define PF_TYPE_DECL(api, ret, proc, args)	PF_TYPE(api, ret, proc, args); PF_DECL(proc)

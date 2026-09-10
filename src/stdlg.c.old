@@ -1425,7 +1425,7 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 	int i, dy;
 	RECT rect;
 	REQRESIZE* rsz;
-	HWND hPolicy, hWindowsToGoLabel;
+	HWND hPolicy;
 	static HWND hFrequency, hBeta;
 	int32_t freq;
 	char update_policy_text[4096];
@@ -1436,23 +1436,16 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		resized_already = FALSE;
 		hUpdatesDlg = hDlg;
 		apply_localization(IDD_UPDATE_POLICY, hDlg);
-		hFrequency = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
-		hBeta = GetDlgItem(hDlg, IDC_INCLUDE_BETAS);
-		// Reuse setting slots for GPT and WTG (port)
+		// Settings options for Windows To Go / GPT (port)
 		if (WindowsVersion.Version < WINDOWS_VISTA)
 			SetWindowTextU(GetDlgItem(hDlg, IDS_UPDATE_FREQUENCY_TXT), lmprintf(MSG_355));
-		if (WindowsVersion.Version < WINDOWS_8) {
-			hWindowsToGoLabel = GetDlgItem(hDlg, IDS_INCLUDE_BETAS_TXT);
-			SetWindowTextU(hWindowsToGoLabel, lmprintf(MSG_118));
-			// Fix left-allignment that I somehow fucked up
-			SetWindowLongPtr(hWindowsToGoLabel, GWL_STYLE,
-				(GetWindowLongPtr(hWindowsToGoLabel, GWL_STYLE) & ~SS_TYPEMASK) | SS_LEFT);
-			SetWindowPos(hWindowsToGoLabel, NULL, 0, 0, 0, 0,
-				SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-		}
+		if (WindowsVersion.Version < WINDOWS_8)
+			SetWindowTextU(GetDlgItem(hDlg, IDS_INCLUDE_BETAS_TXT), lmprintf(MSG_118));
 		PositionControls(hDlg);
 		SetTitleBarIcon(hDlg);
 		CenterDialog(hDlg, NULL);
+		hFrequency = GetDlgItem(hDlg, IDC_UPDATE_FREQUENCY);
+		hBeta = GetDlgItem(hDlg, IDC_INCLUDE_BETAS);
 		freq = ReadSetting32(SETTING_UPDATE_INTERVAL);
 		if (WindowsVersion.Version < WINDOWS_VISTA) {
 			IGNORE_RETVAL(ComboBox_AddStringU(hFrequency, lmprintf(MSG_008)));
@@ -1490,11 +1483,10 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, lmprintf(MSG_008)));
 		IGNORE_RETVAL(ComboBox_AddStringU(hBeta, lmprintf(MSG_009)));
 		if (WindowsVersion.Version < WINDOWS_8) {
-			enable_windows_to_go = (WindowsVersion.Version > WINDOWS_2000) &&
-				!ReadSettingBool(SETTING_DISABLE_WINDOWS_TO_GO);
 			IGNORE_RETVAL(ComboBox_SetCurSel(hBeta, enable_windows_to_go ? 0 : 1));
-			// Disable Windows To Go for W2k for now
-			EnableWindow(hBeta, WindowsVersion.Version > WINDOWS_2000);
+			// Test #2
+			// EnableWindow(hBeta, WindowsVersion.Version > WINDOWS_2000);
+			EnableWindow(hBeta, TRUE);
 		}
 		else {
 			IGNORE_RETVAL(ComboBox_SetCurSel(hBeta,
@@ -1557,8 +1549,12 @@ INT_PTR CALLBACK UpdateCallback(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			if (HIWORD(wParam) != CBN_SELCHANGE)
 				break;
 			if (WindowsVersion.Version < WINDOWS_8) {
+				// Test #3
+				/*
 				enable_windows_to_go = (WindowsVersion.Version > WINDOWS_2000) &&
-					(ComboBox_GetCurSel(hBeta) == 0);
+					(ComboBox_GetCurSel(hBeta) == 0); */
+				enable_windows_to_go = (ComboBox_GetCurSel(hBeta) == 0);
+
 				WriteSettingBool(SETTING_DISABLE_WINDOWS_TO_GO, !enable_windows_to_go);
 				ToggleImageOptions();
 			}
@@ -1581,6 +1577,7 @@ static DWORD WINAPI CheckForFidoThread(LPVOID param)
 	static BOOL is_active = FALSE;
 	LONG_PTR style;
 	char* loc = NULL;
+	uint32_t i;
 	uint64_t len;
 	HWND hCtrl;
 
@@ -1659,8 +1656,6 @@ void SetFidoCheck(void)
 /*
  * Initial update check setup
  */
-
-/*
 BOOL SetUpdateCheck(void)
 {
 	BOOL enable_updates;
@@ -1709,31 +1704,7 @@ BOOL SetUpdateCheck(void)
 	}
 	SetFidoCheck();
 	return TRUE;
-} */
-
-// Disable automatic updates (port)
-
-BOOL SetUpdateCheck(void)
-{
-	uint64_t commcheck = GetTickCount64();
-
-	// Networking remains unavailable on NT5. (port)
-	if (WindowsVersion.Version < WINDOWS_VISTA)
-		return FALSE;
-
-	// Test whether settings can be written and read.
-	WriteSetting64(SETTING_COMM_CHECK, commcheck);
-	if (ReadSetting64(SETTING_COMM_CHECK) != commcheck)
-		return FALSE;
-
-	// Disable automatic update checks by default while retaining manual checks. (port)
-	if (ReadSetting32(SETTING_UPDATE_INTERVAL) == 0)
-		WriteSetting32(SETTING_UPDATE_INTERVAL, -1);
-
-	SetFidoCheck();
-	return TRUE;
 }
-
 
 void CreateStaticFont(HDC hDC, HFONT* hFont, BOOL underlined)
 {
@@ -2049,26 +2020,31 @@ LPCDLGTEMPLATE GetDialogTemplate(int Dialog_ID)
 	// 2. So that Thai displays properly on RTF controls as it won't work with regular
 	// 'Segoe UI'... but Cyrillic won't work with 'Segoe UI Symbol'
 
+	// If 'Segoe UI Symbol' is available, and we are using Thai, we're done here
 	if ((WindowsVersion.Version != WINDOWS_2000) && IsFontAvailable("Segoe UI Symbol") && (selected_locale != NULL)
 		&& (safe_strcmp(selected_locale->txt[0], thai_id) == 0))
 		return rcTemplate;
 
+	// 'Segoe UI Symbol' cannot be used => Fall back to the best we have
 	wBuf = (WCHAR*)rcTemplate;
-	wBuf = &wBuf[14];
-	for (i = 0; i < 2; i++) {
+	wBuf = &wBuf[14];	// Move to class name
+	// Skip class name and title
+	for (i = 0; i<2; i++) {
 		if (*wBuf == 0xFFFF)
-			wBuf = &wBuf[2];
+			wBuf = &wBuf[2];	// Ordinal
 		else
-			wBuf = &wBuf[wcslen(wBuf) + 1];
+			wBuf = &wBuf[wcslen(wBuf) + 1]; // String
 	}
-	// To change the font size to 9 use
+	// NB: to change the font size to 9, you can use
 	// wBuf[0] = 0x0009;
 	wBuf = &wBuf[3];
+	// Make sure we are where we want to be and adjust the font
 	if (wcscmp(L"Segoe UI Symbol", wBuf) == 0) {
 		uintptr_t src, dst, start = (uintptr_t)rcTemplate;
-		// Use Tahoma on XP too, this should fix the wide-window issue
-		const WCHAR* fontName =
-			(WindowsVersion.Version <= WINDOWS_XP) ? L"Tahoma" : L"Segoe UI";
+		const WCHAR* fontName = (WindowsVersion.Version == WINDOWS_2000) ? L"Tahoma" : L"Segoe UI";
+		// We can't simply zero the characters we don't want, as the size of the font
+		// string determines the next item lookup. So we must memmove the remaining of
+		// our buffer. Oh, and those items are DWORD aligned.
 		src = ((uintptr_t)&wBuf[wcslen(wBuf) + 1] + 3) & ~(uintptr_t)3;
 		len = wcslen(fontName);
 		dst = ((uintptr_t)&wBuf[len + 1] + 3) & ~(uintptr_t)3;

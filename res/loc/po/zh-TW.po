@@ -1915,8 +1915,8 @@ msgid "Use Rufus MBR"
 msgstr "使用 Rufus MBR"
 
 #. • MSG_355
-msgid "Enable GPT (experimental)"
-msgstr "啟用 GPT（實驗性）"
+msgid "Enable GPT"
+msgstr "啟用 GPT"
 
 #. • MSG_356
 msgid "Windows XP cannot access drives that use the GPT partition scheme.\n\nRufus can still create this drive for use on another computer. Continue only if you are creating EFI-bootable media and the target computer supports UEFI.\n\nDo you want to continue?"

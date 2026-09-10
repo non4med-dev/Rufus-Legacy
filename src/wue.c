@@ -45,14 +45,230 @@ const char* bypass_name[] = { "BypassTPMCheck", "BypassSecureBootCheck", "Bypass
 
 int unattend_xml_flags = 0, wintogo_index = -1, wininst_index = 0;
 int unattend_xml_mask = UNATTEND_DEFAULT_SELECTION_MASK;
-char *unattend_xml_path = NULL, unattend_username[MAX_USERNAME_LENGTH];
+char* unattend_xml_path = NULL, unattend_username[MAX_USERNAME_LENGTH];
 BOOL is_bootloader_revoked = FALSE;
+
+static char legacy_wtg_dir[MAX_PATH], legacy_wtg_image[MAX_PATH];
+static char legacy_wtg_source[MAX_PATH], legacy_wtg_internal[MAX_PATH];
+static int64_t legacy_wtg_source_size = -1, legacy_wtg_source_time = -1;
 
 extern uint32_t wim_nb_files, wim_proc_files, wim_extra_files;
 extern BOOL validate_md5sum;
 extern uint64_t md5sum_totalbytes;
 extern StrArray modified_files;
 extern const char* efi_archname[ARCH_MAX];
+
+// Im not even gonna bother commenting this shit from now on
+// If you dont get whats going on even comments wont help
+// This is the code. It works. Be happy.
+
+void CleanupWinToGoTemp(void)
+{
+	if ((legacy_wtg_dir[0] != 0) && PathFileExistsU(legacy_wtg_dir) &&
+		(SHDeleteDirectoryExU(NULL, legacy_wtg_dir, FOF_NO_UI) != 0)) {
+		uprintf("Could not remove Windows To Go temporary directory '%s'", legacy_wtg_dir);
+		return;
+	}
+	legacy_wtg_dir[0] = 0;
+	legacy_wtg_image[0] = 0;
+	legacy_wtg_source[0] = 0;
+	legacy_wtg_internal[0] = 0;
+	legacy_wtg_source_size = -1;
+	legacy_wtg_source_time = -1;
+}
+
+BOOL IsWinToGoTempCurrent(const char* source)
+{
+	struct __stat64 source_info = { 0 };
+
+	return (source != NULL) && (legacy_wtg_image[0] != 0) &&
+		(safe_strcmp(legacy_wtg_source, source) == 0) && PathFileExistsU(legacy_wtg_image) &&
+		(_stat64U(source, &source_info) == 0) && (source_info.st_size == legacy_wtg_source_size) &&
+		((int64_t)source_info.st_mtime == legacy_wtg_source_time);
+}
+
+static uint16_t GetSplitWimPartCount(const char* path)
+{
+	static const uint8_t wim_magic[8] = { 'M', 'S', 'W', 'I', 'M', 0, 0, 0 };
+	static const uint8_t pwm_magic[8] = { 'W', 'L', 'P', 'W', 'M', 0, 0, 0 };
+	DWORD bytes_read;
+	HANDLE file = INVALID_HANDLE_VALUE;
+	LARGE_INTEGER offset;
+	uint8_t header[44];
+	uint16_t part_number, total_parts, result = 0;
+
+	file = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, NULL);
+	if ((file == INVALID_HANDLE_VALUE) ||
+		!ReadFile(file, header, sizeof(header), &bytes_read, NULL) ||
+		(bytes_read != sizeof(header)))
+		goto out;
+
+	if (memcmp(header, pwm_magic, sizeof(pwm_magic)) == 0) {
+		offset.QuadPart = -208;
+		if (!SetFilePointerEx(file, offset, NULL, FILE_END) ||
+			!ReadFile(file, header, sizeof(header), &bytes_read, NULL) ||
+			(bytes_read != sizeof(header)))
+			goto out;
+	}
+	if ((memcmp(header, wim_magic, sizeof(wim_magic)) != 0) &&
+		(memcmp(header, pwm_magic, sizeof(pwm_magic)) != 0))
+		goto out;
+	if ((header[8] != 208) || (header[9] != 0) || (header[10] != 0) || (header[11] != 0))
+		goto out;
+	part_number = (uint16_t)(header[40] | ((uint16_t)header[41] << 8));
+	total_parts = (uint16_t)(header[42] | ((uint16_t)header[43] << 8));
+	if ((part_number == 1) && (total_parts != 0) && (total_parts <= 1024))
+		result = total_parts;
+
+out:
+	safe_closehandle(file);
+	return result;
+}
+
+static const char* PrepareLegacyWinToGoImage(int index)
+{
+	const char* internal_path;
+	const char* extension;
+	BOOL is_split;
+	char internal_part[MAX_PATH], part_name[32], part_path[MAX_PATH];
+	size_t internal_prefix_length;
+	uint16_t part, part_count;
+	int64_t extracted_size;
+	uint64_t start_time;
+	struct __stat64 source_info = { 0 };
+
+	if (img_report.is_windows_img)
+		return image_path;
+	if (image_path == NULL || index < 0 || index >= img_report.wininst_index)
+		return NULL;
+	internal_path = &img_report.wininst_path[index][2];
+	if (safe_strlen(internal_path) < 4)
+		return NULL;
+	extension = &internal_path[safe_strlen(internal_path) - 3];
+	is_split = (safe_stricmp(extension, "swm") == 0);
+	if (is_split && ((safe_strlen(internal_path) < safe_strlen("install.swm")) ||
+		(safe_stricmp(&internal_path[safe_strlen(internal_path) - safe_strlen("install.swm")],
+			"install.swm") != 0)))
+		return NULL;
+	if (IsWinToGoTempCurrent(image_path) &&
+		(safe_strcmp(legacy_wtg_internal, internal_path) == 0) && PathFileExistsU(legacy_wtg_image))
+		return legacy_wtg_image;
+
+	CleanupWinToGoTemp();
+	if (legacy_wtg_dir[0] != 0)
+		return NULL;
+	// Unpredictable directory name, just as a precaution
+	if (GetTempFileNameU(temp_dir, "RWT", 0, legacy_wtg_dir) == 0) {
+		uprintf("Could not allocate a Windows To Go temporary directory: %s", WindowsErrorString());
+		return NULL;
+	}
+	DeleteFileU(legacy_wtg_dir);
+	if (!CreateDirectoryU(legacy_wtg_dir, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) {
+		uprintf("Could not create Windows To Go temporary directory: %s", WindowsErrorString());
+		CleanupWinToGoTemp();
+		return NULL;
+	}
+	static_sprintf(part_path, "%s\\install.%s", legacy_wtg_dir, extension);
+	uprintf("Extracting Windows image to temporary storage...");
+	start_time = GetTickCount64();
+	extracted_size = ExtractISOFile(image_path, internal_path, part_path, FILE_ATTRIBUTE_NORMAL);
+	if (extracted_size <= 0) {
+		uprintf("Could not extract %s from the ISO", internal_path);
+		CleanupWinToGoTemp();
+		return NULL;
+	}
+	if (is_split) {
+		part_count = GetSplitWimPartCount(part_path);
+		if (part_count == 0) {
+			uprintf("Could not determine the split WIM part count");
+			CleanupWinToGoTemp();
+			return NULL;
+		}
+		internal_prefix_length = safe_strlen(internal_path) - safe_strlen("install.swm");
+		for (part = 2; part <= part_count; part++) {
+			static_sprintf(part_name, "install%u.swm", (unsigned)part);
+			safe_sprintf(internal_part, sizeof(internal_part), "%.*s%s",
+				(int)internal_prefix_length, internal_path, part_name);
+			static_sprintf(part_path, "%s\\%s", legacy_wtg_dir, part_name);
+			uprintf("Extracting split WIM part %u of %u...",
+				(unsigned)part, (unsigned)part_count);
+			extracted_size = ExtractISOFile(image_path, internal_part, part_path,
+				FILE_ATTRIBUTE_NORMAL);
+			if (extracted_size <= 0) {
+				uprintf("Could not extract %s from the ISO", internal_part);
+				CleanupWinToGoTemp();
+				return NULL;
+			}
+		}
+		if (!WimJoinSplitImage(legacy_wtg_dir, "install.wim", "install", part_count)) {
+			CleanupWinToGoTemp();
+			return NULL;
+		}
+		static_sprintf(legacy_wtg_image, "%s\\install.wim", legacy_wtg_dir);
+
+		for (part = 1; part <= part_count; part++) {
+			if (part == 1)
+				static_strcpy(part_name, "install.swm");
+			else
+				static_sprintf(part_name, "install%u.swm", (unsigned)part);
+			static_sprintf(part_path, "%s\\%s", legacy_wtg_dir, part_name);
+			DeleteFileU(part_path);
+		}
+	}
+	else {
+		static_strcpy(legacy_wtg_image, part_path);
+	}
+	static_strcpy(legacy_wtg_source, image_path);
+	static_strcpy(legacy_wtg_internal, internal_path);
+	if (_stat64U(image_path, &source_info) == 0) {
+		legacy_wtg_source_size = source_info.st_size;
+		legacy_wtg_source_time = (int64_t)source_info.st_mtime;
+	}
+	uprintf("Windows image prepared in %llu seconds", (GetTickCount64() - start_time + 999) / 1000);
+	return legacy_wtg_image;
+}
+
+static BOOL HasWinToGoApplyBackend(void)
+{
+	uint8_t methods;
+
+	// If it's disabled, it's disabled. 
+	if (!enable_windows_to_go || (WindowsVersion.Version <= WINDOWS_2000))
+		return FALSE;
+	methods = WimExtractCheck(TRUE);
+	return (WindowsVersion.Version >= WINDOWS_8) ?
+		((methods & WIM_HAS_API_APPLY) != 0) : (WIM_HAS_APPLY(methods) != 0);
+}
+
+// Reject missing / broken executables
+static BOOL IsPeExecutable(const char* path)
+{
+	BOOL r = FALSE;
+	DWORD read_size, signature;
+	HANDLE file = INVALID_HANDLE_VALUE;
+	IMAGE_DOS_HEADER dos_header;
+
+	file = CreateFileU(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, NULL);
+	if (file == INVALID_HANDLE_VALUE)
+		goto out;
+	if (!ReadFile(file, &dos_header, sizeof(dos_header), &read_size, NULL) ||
+		read_size != sizeof(dos_header) || dos_header.e_magic != IMAGE_DOS_SIGNATURE ||
+		dos_header.e_lfanew <= 0)
+		goto out;
+	if (SetFilePointer(file, dos_header.e_lfanew, NULL, FILE_BEGIN) == INVALID_SET_FILE_POINTER &&
+		GetLastError() != ERROR_SUCCESS)
+		goto out;
+	if (!ReadFile(file, &signature, sizeof(signature), &read_size, NULL) ||
+		read_size != sizeof(signature) || signature != IMAGE_NT_SIGNATURE)
+		goto out;
+	r = TRUE;
+
+out:
+	safe_closehandle(file);
+	return r;
+}
 
 /// <summary>
 /// Create an installation answer file containing the sections specified by the flags.
@@ -474,22 +690,32 @@ static void PopulateWindowsVersionFromXml(const char* xml_file, int index)
 /// <returns>TRUE on success, FALSE if we couldn't populate the version.</returns>
 BOOL PopulateWindowsVersion(void)
 {
-	char *mounted_iso, mounted_image_path[128];
+	char* mounted_iso, mounted_image_path[128];
+	const char* selected_image = image_path;
 	char xml_file[MAX_PATH] = "";
 
 	memset(&img_report.win_version, 0, sizeof(img_report.win_version));
 
-	if ((WindowsVersion.Version >= WINDOWS_2000) || ((WimExtractCheck(TRUE) & 4) == 0))
+	if (!HasWinToGoApplyBackend())
 		return FALSE;
 
 	// If we're not using a straight install.wim, we need to mount the ISO to access it
 	if (!img_report.is_windows_img) {
-		mounted_iso = VhdMountImage(image_path);
-		if (mounted_iso == NULL) {
-			uprintf("Could not mount Windows ISO for build number detection");
-			return FALSE;
+		if (WindowsVersion.Version < WINDOWS_8) {
+			// Extract image instead of mounting
+			selected_image = PrepareLegacyWinToGoImage(0);
+			if (selected_image == NULL)
+				return FALSE;
 		}
-		static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[0][2]);
+		else {
+			mounted_iso = VhdMountImage(image_path);
+			if (mounted_iso == NULL) {
+				uprintf("Could not mount Windows ISO for build number detection");
+				return FALSE;
+			}
+			static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[0][2]);
+			selected_image = mounted_image_path;
+		}
 	}
 
 	// Now take a look at the XML file in install.wim to list our versions
@@ -501,8 +727,7 @@ BOOL PopulateWindowsVersion(void)
 	DeleteFileU(xml_file);
 
 	// Must use the Windows WIM API as 7z messes up the XML
-	if (!WimExtractFile_API(img_report.is_windows_img ? image_path : mounted_image_path,
-		0, "[1].xml", xml_file, TRUE)) {
+	if (!WimExtractMetadata(selected_image, xml_file, TRUE)) {
 		uprintf("Could not acquire WIM index");
 		goto out;
 	}
@@ -511,7 +736,7 @@ BOOL PopulateWindowsVersion(void)
 
 out:
 	DeleteFileU(xml_file);
-	if (!img_report.is_windows_img)
+	if (!img_report.is_windows_img && WindowsVersion.Version >= WINDOWS_8)
 		VhdUnmountImage();
 
 	return ((img_report.win_version.major != 0) && (img_report.win_version.build != 0));
@@ -552,6 +777,7 @@ BOOL CopySKUSiPolicy(const char* drive_name)
 int SetWinToGoIndex(void)
 {
 	char* mounted_iso, mounted_image_path[128];
+	const char* selected_image = image_path;
 	char xml_file[MAX_PATH] = "";
 	char* install_names[MAX_WININST];
 	StrArray version_name, version_index;
@@ -561,8 +787,7 @@ int SetWinToGoIndex(void)
 	// Sanity checks
 	wintogo_index = -1;
 	wininst_index = 0;
-	if ((WindowsVersion.Version >= WINDOWS_2000) || ((WimExtractCheck(FALSE) & 4) == 0) ||
-		(ComboBox_GetCurItemData(hFileSystem) != FS_NTFS)) {
+	if (!HasWinToGoApplyBackend() || (ComboBox_GetCurItemData(hFileSystem) != FS_NTFS)) {
 		return -1;
 	}
 
@@ -579,12 +804,20 @@ int SetWinToGoIndex(void)
 
 	// If we're not using a straight install.wim, we need to mount the ISO to access it
 	if (!img_report.is_windows_img) {
-		mounted_iso = VhdMountImage(image_path);
-		if (mounted_iso == NULL) {
-			uprintf("Could not mount ISO for Windows To Go selection");
-			return -1;
+		if (WindowsVersion.Version < WINDOWS_8) {
+			selected_image = PrepareLegacyWinToGoImage(wininst_index);
+			if (selected_image == NULL)
+				return -1;
 		}
-		static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[wininst_index][2]);
+		else {
+			mounted_iso = VhdMountImage(image_path);
+			if (mounted_iso == NULL) {
+				uprintf("Could not mount ISO for Windows To Go selection");
+				return -1;
+			}
+			static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[wininst_index][2]);
+			selected_image = mounted_image_path;
+		}
 	}
 
 	// Now take a look at the XML file in install.wim to list our versions
@@ -596,8 +829,7 @@ int SetWinToGoIndex(void)
 	DeleteFileU(xml_file);
 
 	// Must use the Windows WIM API as 7z messes up the XML
-	if (!WimExtractFile_API(img_report.is_windows_img ? image_path : mounted_image_path,
-		0, "[1].xml", xml_file, FALSE)) {
+	if (!WimExtractMetadata(selected_image, xml_file, FALSE)) {
 		uprintf("Could not acquire WIM index");
 		goto out;
 	}
@@ -676,38 +908,62 @@ out:
 /// <returns>TRUE on success, FALSE on error.</returns>
 BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 {
-	char *mounted_iso, *ms_efi = NULL, mounted_image_path[128], cmd[MAX_PATH];
+	char* mounted_iso, * ms_efi = NULL, mounted_image_path[128], cmd[4 * MAX_PATH];
+	char deployment_dir[MAX_PATH], deployment_tool[MAX_PATH];
+	const char* selected_image = image_path;
+	BOOL legacy_host = (WindowsVersion.Version < WINDOWS_8);
 	ULONG cluster_size;
 
 	uprintf("Windows To Go mode selected");
+	// Reject if Windows To Go is turned off
+	if (!enable_windows_to_go || (WindowsVersion.Version <= WINDOWS_2000)) {
+		ErrorStatus = RUFUS_ERROR(ERROR_NOT_SUPPORTED);
+		return FALSE;
+	}
 	// Additional sanity checks
-	if ((use_esp) && (SelectedDrive.MediaType != FixedMedia) && (WindowsVersion.BuildNumber < 15000)) {
+	if (use_esp && (WindowsVersion.Version >= WINDOWS_8) &&
+		(SelectedDrive.MediaType != FixedMedia) && (WindowsVersion.BuildNumber < 15000)) {
 		ErrorStatus = RUFUS_ERROR(ERROR_NOT_SUPPORTED);
 		return FALSE;
 	}
 
 	if (!img_report.is_windows_img) {
-		mounted_iso = VhdMountImage(image_path);
-		if (mounted_iso == NULL) {
-			uprintf("Could not mount ISO for Windows To Go installation");
-			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_EXTRACT));
-			return FALSE;
+		if (legacy_host) {
+			// Apply extracted Windows To Go
+			selected_image = PrepareLegacyWinToGoImage(wininst_index);
+			if (selected_image == NULL) {
+				ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_EXTRACT));
+				return FALSE;
+			}
 		}
-		static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[wininst_index][2]);
-		uprintf("Mounted ISO as '%s'", mounted_iso);
+		else {
+			mounted_iso = VhdMountImage(image_path);
+			if (mounted_iso == NULL) {
+				uprintf("Could not mount ISO for Windows To Go installation");
+				ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_EXTRACT));
+				return FALSE;
+			}
+			static_sprintf(mounted_image_path, "%s%s", mounted_iso, &img_report.wininst_path[wininst_index][2]);
+			selected_image = mounted_image_path;
+			uprintf("Mounted ISO as '%s'", mounted_iso);
+		}
 	}
 
 	// Now we use the WIM API to apply that image
-	if (!WimApplyImage(img_report.is_windows_img ? image_path : mounted_image_path, wintogo_index, drive_name)) {
+	if (!WimApplyImage(selected_image, wintogo_index, drive_name)) {
 		uprintf("Failed to apply Windows To Go image");
 		if (!IS_ERROR(ErrorStatus))
 			ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_EXTRACT));
-		if (!img_report.is_windows_img)
+		if (!img_report.is_windows_img && !legacy_host)
 			VhdUnmountImage();
+		if (legacy_host)
+			CleanupWinToGoTemp();
 		return FALSE;
 	}
-	if (!img_report.is_windows_img)
+	if (!img_report.is_windows_img && !legacy_host)
 		VhdUnmountImage();
+	if (legacy_host)
+		CleanupWinToGoTemp();
 
 	if (use_esp) {
 		uprintf("Setting up EFI System Partition");
@@ -744,14 +1000,32 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 	// Also, since Rufus should (usually) be running as a 32 bit app, on 64 bit systems, we need to use
 	// 'C:\Windows\Sysnative' and not 'C:\Windows\System32' to invoke bcdboot, as 'C:\Windows\System32'
 	// will get converted to 'C:\Windows\SysWOW64' behind the scenes, and there is no bcdboot.exe there.
+	// bcdboot Windows To Go
 	uprintf("Enabling boot using command:");
-	static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /v /f %s /s %s", sysnative_dir, drive_name,
-		HAS_BOOTMGR_BIOS(img_report) ? (HAS_BOOTMGR_EFI(img_report) ? "ALL" : "BIOS") : "UEFI",
-		(use_esp) ? ms_efi : drive_name);
-	// I don't believe we can ever have a stray '%' in cmd, but just in case...
-	assert(strchr(cmd, '%') == NULL);
-	uprintf(cmd);
-	if (RunCommand(cmd, sysnative_dir, usb_debug) != 0) {
+	if (legacy_host) {
+		static_sprintf(deployment_dir, "%s\\%s", app_data_dir, FILES_DIR);
+		static_sprintf(deployment_tool, "%s\\bcdboot.exe", deployment_dir);
+		if (!IsPeExecutable(deployment_tool)) {
+			uprintf("A compatible bcdboot.exe was not found in '%s'", deployment_dir);
+			ErrorStatus = RUFUS_ERROR(ERROR_NOT_SUPPORTED);
+			if (use_esp)
+				AltUnmountVolume(ms_efi, FALSE);
+			return FALSE;
+		}
+		static_sprintf(cmd, "\"%s\" %s\\Windows /v /f %s /s %s", deployment_tool, drive_name,
+			HAS_BOOTMGR_BIOS(img_report) ? (HAS_BOOTMGR_EFI(img_report) ? "ALL" : "BIOS") : "UEFI",
+			(use_esp) ? ms_efi : drive_name);
+	}
+	else {
+		static_sprintf(deployment_dir, "%s", sysnative_dir);
+		static_sprintf(cmd, "%s\\bcdboot.exe %s\\Windows /v /f %s /s %s", sysnative_dir, drive_name,
+			HAS_BOOTMGR_BIOS(img_report) ? (HAS_BOOTMGR_EFI(img_report) ? "ALL" : "BIOS") : "UEFI",
+			(use_esp) ? ms_efi : drive_name);
+	}
+	if (!legacy_host)
+		assert(strchr(cmd, '%') == NULL);
+	uprintf("%s", cmd);
+	if (RunCommand(cmd, deployment_dir, usb_debug) != 0) {
 		// Try to continue... but report a failure
 		uprintf("Failed to enable boot");
 		ErrorStatus = RUFUS_ERROR(APPERR(ERROR_ISO_EXTRACT));
@@ -774,12 +1048,14 @@ BOOL SetupWinToGo(DWORD DriveIndex, const char* drive_name, BOOL use_esp)
 		RunCommand(cmd, NULL, usb_debug);
 	}
 
+
 	uprintf("Disabling use of the Windows Recovery Environment using command:");
 	static_sprintf(cmd, "%s\\bcdedit.exe /store %s\\EFI\\Microsoft\\Boot\\BCD /set {default} recoveryenabled no",
 		sysnative_dir, (use_esp) ? ms_efi : drive_name);
 	assert(strchr(cmd, '%') == NULL);
 	uprintf(cmd);
 	RunCommand(cmd, sysnative_dir, usb_debug);
+
 
 	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, wim_nb_files, wim_nb_files);
 

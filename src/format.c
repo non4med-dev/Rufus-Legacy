@@ -1510,8 +1510,17 @@ DWORD WINAPI FormatThread(void* param)
 		extra_partitions |= XP_PERSISTENCE;
 	// According to Microsoft, every GPT disk (we RUN Windows from) must have an MSR due to not having hidden sectors
 	// https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-and-gpt-faq#disks-that-require-an-msr
-	if ((windows_to_go) && (target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT))
-		extra_partitions |= XP_ESP | XP_MSR;
+	// 
+	if (windows_to_go && (target_type == TT_UEFI) && (partition_type == PARTITION_STYLE_GPT)) {
+		if ((WindowsVersion.Version < WINDOWS_8) && (SelectedDrive.MediaType != FixedMedia)) {
+			// Windows To Go resorts to UEFI:NTFS for creating partitions (port)
+			extra_partitions |= XP_UEFI_NTFS;
+			uprintf("Using UEFI:NTFS for legacy removable Windows To Go media");
+		}
+		else {
+			extra_partitions |= XP_ESP | XP_MSR;
+		}
+	}
 	// If we have a bootable image with UEFI bootloaders and the target file system is NTFS or exFAT
 	// or the UEFI:NTFS option is selected, we add the UEFI:NTFS partition...
 	else if ((((boot_type == BT_IMAGE) && IS_EFI_BOOTABLE(img_report)) && ((fs_type == FS_NTFS) || (fs_type == FS_EXFAT))) ||

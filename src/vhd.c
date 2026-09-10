@@ -78,10 +78,10 @@ static uint8_t wim_flags = 0;
 static uint32_t progress_report_mask;
 static uint64_t progress_offset = 0, progress_total = 100;
 static wchar_t wmount_path[MAX_PATH] = { 0 }, wmount_track[MAX_PATH] = { 0 };
-static char sevenzip_path[MAX_PATH], physical_path[128] = "";
+static char sevenzip_path[MAX_PATH], wimlib_path[MAX_PATH], physical_path[128] = "";
 static const char vhd_footer_cookie[] = VHD_FOOTER_COOKIE;
 static int progress_op = OP_FILE_COPY, progress_msg = MSG_267;
-static BOOL count_files;
+static BOOL count_files, legacy_wim_apply;
 static HANDLE mounted_handle = INVALID_HANDLE_VALUE;
 
 static BOOL Get7ZipPath(void)
@@ -92,6 +92,78 @@ static BOOL Get7ZipPath(void)
 		return (_accessU(sevenzip_path, 0) != -1);
 	}
 	return FALSE;
+}
+
+// wimlib-imagex (port)
+static BOOL GetWimlibPath(void)
+{
+	if (wimlib_path[0] == 0)
+		static_sprintf(wimlib_path, "%s\\%s\\wimlib-imagex.exe", app_data_dir, FILES_DIR);
+	return (_accessU(wimlib_path, 0) != -1);
+}
+
+// Capture WIM XML without shell redirection
+static BOOL WimlibExtractMetadata(const char* image, const char* dst, BOOL bSilent)
+{
+	BOOL r;
+	DWORD exit_code = ERROR_GEN_FAILURE, wait_result;
+	char cmdline[4 * MAX_PATH];
+	HANDLE output = INVALID_HANDLE_VALUE, null_input = INVALID_HANDLE_VALUE;
+	HANDLE null_output = INVALID_HANDLE_VALUE;
+	PROCESS_INFORMATION pi = { 0 };
+	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
+	STARTUPINFOA si = { 0 };
+	struct __stat64 stat64 = { 0 };
+
+	if (!GetWimlibPath() || image == NULL || dst == NULL)
+		return FALSE;
+	output = CreateFileU(dst, GENERIC_WRITE, FILE_SHARE_READ, &sa, CREATE_ALWAYS,
+		FILE_ATTRIBUTE_TEMPORARY, NULL);
+	if (output == INVALID_HANDLE_VALUE)
+		goto out;
+	null_output = CreateFileA("NUL", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (null_output == INVALID_HANDLE_VALUE)
+		goto out;
+	null_input = CreateFileA("NUL", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (null_input == INVALID_HANDLE_VALUE)
+		goto out;
+
+	si.cb = sizeof(si);
+	si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+	si.wShowWindow = SW_HIDE;
+	si.hStdInput = null_input;
+	si.hStdOutput = output;
+	si.hStdError = null_output;
+	static_sprintf(cmdline, "\"%s\" info \"%s\" --xml", wimlib_path, image);
+	if (!CreateProcessU(NULL, cmdline, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS | CREATE_NO_WINDOW,
+		NULL, app_data_dir, &si, &pi)) {
+		if (!bSilent)
+			uprintf("Could not start wimlib-imagex: %s", WindowsErrorString());
+		goto out;
+	}
+	do {
+		wait_result = WaitForSingleObject(pi.hProcess, 100);
+		if (IS_ERROR(ErrorStatus) && SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
+			TerminateProcess(pi.hProcess, ERROR_CANCELLED);
+			wait_result = WaitForSingleObject(pi.hProcess, 5000);
+			break;
+		}
+	} while (wait_result == WAIT_TIMEOUT);
+	if (wait_result == WAIT_OBJECT_0)
+		GetExitCodeProcess(pi.hProcess, &exit_code);
+
+out:
+	safe_closehandle(pi.hThread);
+	safe_closehandle(pi.hProcess);
+	safe_closehandle(null_input);
+	safe_closehandle(null_output);
+	safe_closehandle(output);
+	r = (exit_code == 0) && (_stat64U(dst, &stat64) == 0) && (stat64.st_size != 0);
+	if (!r)
+		DeleteFileU(dst);
+	return r;
 }
 
 // Taken STRAIGHT OUTTA MFING 2.18 (port)
@@ -364,7 +436,9 @@ DWORD WINAPI WimProgressCallback(DWORD dwMsgId, WPARAM wParam, LPARAM lParam, PV
 				wim_proc_files++;
 			else
 				wim_extra_files++;
-			UpdateProgressWithInfo(progress_op, progress_msg, wim_proc_files, wim_nb_files);
+			// Update Windows To Go progress bar every 1% for performance (port)
+			if (!legacy_wim_apply || ((wim_proc_files & 0x3F) == 0) || (wim_proc_files == wim_nb_files))
+				UpdateProgressWithInfo(progress_op, progress_msg, wim_proc_files, wim_nb_files);
 		}
 		// Halt on error
 		if (IS_ERROR(ErrorStatus)) {
@@ -423,12 +497,19 @@ uint8_t WimExtractCheck(BOOL bSilent)
 		wim_flags |= WIM_HAS_7Z_EXTRACT;
 	if ((wim_flags & WIM_HAS_API_EXTRACT) && pfWIMApplyImage && pfWIMRegisterMessageCallback && pfWIMUnregisterMessageCallback)
 		wim_flags |= WIM_HAS_API_APPLY;
+	wim_flags &= ~(WIM_HAS_WIMLIB_INFO | WIM_HAS_WIMLIB_APPLY);
+	if (GetWimlibPath())
+		wim_flags |= WIM_HAS_WIMLIB_INFO | WIM_HAS_WIMLIB_APPLY;
 
-	suprintf("WIM extraction method(s) supported: %s%s%s", (wim_flags & WIM_HAS_7Z_EXTRACT)?"7-Zip":
-		((wim_flags & WIM_HAS_API_EXTRACT)?"":"NONE"),
-		(WIM_HAS_EXTRACT(wim_flags) == (WIM_HAS_API_EXTRACT|WIM_HAS_7Z_EXTRACT))?", ":
-		"", (wim_flags & WIM_HAS_API_EXTRACT)?"wimgapi.dll":"");
-	suprintf("WIM apply method supported: %s", (wim_flags & WIM_HAS_API_APPLY)?"wimgapi.dll":"NONE");
+	suprintf("WIM extraction method(s) supported: %s%s%s", (wim_flags & WIM_HAS_7Z_EXTRACT) ? "7-Zip" :
+		((wim_flags & WIM_HAS_API_EXTRACT) ? "" : "NONE"),
+		(WIM_HAS_EXTRACT(wim_flags) == (WIM_HAS_API_EXTRACT | WIM_HAS_7Z_EXTRACT)) ? ", " :
+		"", (wim_flags & WIM_HAS_API_EXTRACT) ? "wimgapi.dll" : "");
+	suprintf("WIM apply method supported: %s%s%s",
+		(wim_flags & WIM_HAS_API_APPLY) ? "wimgapi.dll" : "",
+		((wim_flags & WIM_HAS_API_APPLY) && (wim_flags & WIM_HAS_WIMLIB_APPLY)) ? ", " : "",
+		(wim_flags & WIM_HAS_WIMLIB_APPLY) ? "wimlib-imagex.exe" :
+		((wim_flags & WIM_HAS_API_APPLY) ? "" : "NONE"));
 	return wim_flags;
 } 
 
@@ -747,6 +828,21 @@ out:
 	return r;
 }
 
+BOOL WimExtractMetadata(const char* image, const char* dst, BOOL bSilent)
+{
+	uint8_t methods = WimExtractCheck(TRUE);
+
+	if ((methods & WIM_HAS_API_EXTRACT) &&
+		WimExtractFile_API(image, 0, "[1].xml", dst, bSilent))
+		return TRUE;
+	if ((WindowsVersion.Version < WINDOWS_8) && (methods & WIM_HAS_WIMLIB_INFO) &&
+		WimlibExtractMetadata(image, dst, bSilent))
+		return TRUE;
+	if (!bSilent)
+		uprintf("Could not read Windows image metadata");
+	return FALSE;
+}
+
 // Extract a file from a WIM image using 7-Zip
 BOOL WimExtractFile_7z(const char* image, int index, const char* src, const char* dst, BOOL bSilent)
 {
@@ -910,7 +1006,9 @@ static DWORD WINAPI WimApplyImageThread(LPVOID param)
 
 	uprintf("Opening: %s:[%d]", mp->image, mp->index);
 
-	progress_report_mask = WIM_REPORT_PROCESS | WIM_REPORT_FILEINFO;
+	legacy_wim_apply = (WindowsVersion.Version < WINDOWS_8);
+	// Per file messages make wimlib slow (Windows To Go) (port)
+	progress_report_mask = WIM_REPORT_PROCESS | (legacy_wim_apply ? 0 : WIM_REPORT_FILEINFO);
 	progress_op = OP_FILE_COPY;
 	progress_msg = MSG_267;
 	progress_offset = 0;
@@ -961,7 +1059,7 @@ static DWORD WINAPI WimApplyImageThread(LPVOID param)
 	wim_nb_files += wim_nb_files / 5;
 	count_files = FALSE;
 	// Actual apply
-	if (!pfWIMApplyImage(hImage, wdst, WIM_FLAG_FILEINFO)) {
+	if (!pfWIMApplyImage(hImage, wdst, legacy_wim_apply ? 0 : WIM_FLAG_FILEINFO)) {
 		uprintf("  Could not apply image: %s", WindowsErrorString());
 		goto out;
 	}
@@ -987,25 +1085,338 @@ out:
 	ExitThread((DWORD)r);
 }
 
+// A little gimagex progress implementation for Windows To Go (port)
+static BOOL WimlibApplyProgress(const char* line, int* progress)
+{
+	const char* end, * start;
+	double percent;
+	int offset, span;
+
+	if ((line == NULL) || (progress == NULL))
+		return FALSE;
+	if (strstr(line, "Creating files:") != NULL) {
+		offset = 0;
+		span = 20;
+	}
+	else if (strstr(line, "Extracting file data:") != NULL) {
+		offset = 20;
+		span = 60;
+	}
+	else if (strstr(line, "Applying metadata to files:") != NULL) {
+		offset = 80;
+		span = 20;
+	}
+	else {
+		return FALSE;
+	}
+
+	end = strstr(line, "%) done");
+	if (end == NULL)
+		return FALSE;
+	start = end;
+	while ((start > line) &&
+		(((start[-1] >= '0') && (start[-1] <= '9')) || (start[-1] == '.')))
+		start--;
+	if (start == end)
+		return FALSE;
+	percent = strtod(start, NULL);
+	if (percent < 0.0)
+		percent = 0.0;
+	if (percent > 100.0)
+		percent = 100.0;
+	*progress = offset + (uint64_t)(((percent * span) / 100.0) + 0.5);
+	return TRUE;
+}
+
+static BOOL WimlibCommandProgress(const char* line, BOOL joining, uint64_t* progress)
+{
+	const char* end, * start;
+	double percent;
+	int offset, span;
+
+	if ((line == NULL) || (progress == NULL))
+		return FALSE;
+	if (joining && (strstr(line, "Archiving file data:") != NULL)) {
+		offset = 0;
+		span = 1000;
+	}
+	else if (!joining && (strstr(line, "Creating files:") != NULL)) {
+		offset = 0;
+		span = 200;
+	}
+	else if (!joining && (strstr(line, "Extracting file data:") != NULL)) {
+		offset = 200;
+		span = 600;
+	}
+	else if (!joining && (strstr(line, "Applying metadata to files:") != NULL)) {
+		offset = 800;
+		span = 200;
+	}
+	else {
+		return FALSE;
+	}
+
+	end = strstr(line, "%) done");
+	if (end == NULL)
+		return FALSE;
+	start = end;
+	while ((start > line) &&
+		(((start[-1] >= '0') && (start[-1] <= '9')) || (start[-1] == '.')))
+		start--;
+	if (start == end)
+		return FALSE;
+	percent = strtod(start, NULL);
+	if (percent < 0.0)
+		percent = 0.0;
+	if (percent > 100.0)
+		percent = 100.0;
+	*progress = offset + (uint64_t)(((percent * span) / 100.0) + 0.5);
+	return TRUE;
+}
+
+// Windows To Go (Im tired) (Port)
+// If you, whoever you are ever find this
+// Im sorry but if you want to understand this code
+// Good luck.
+static DWORD RunWimlibCommand(char* cmdline, const char* directory, BOOL joining)
+{
+	BOOL process_done = FALSE;
+	DWORD available, bytes_read, exit_code = ERROR_GEN_FAILURE, wait_result;
+	HANDLE output_read = INVALID_HANDLE_VALUE, output_write = INVALID_HANDLE_VALUE;
+	HANDLE null_input = INVALID_HANDLE_VALUE;
+	PROCESS_INFORMATION pi = { 0 };
+	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
+	STARTUPINFOA si = { 0 };
+	char chunk[1024], line[4096];
+	size_t i, line_length = 0;
+	uint64_t progress;
+	int displayed_progress, last_logged_progress = -10;
+
+	if (!CreatePipe(&output_read, &output_write, &sa, 4096)) {
+		exit_code = GetLastError();
+		uprintf("Could not create wimlib output pipe: %s", WindowsErrorString());
+		goto out;
+	}
+	if (!SetHandleInformation(output_read, HANDLE_FLAG_INHERIT, 0)) {
+		exit_code = GetLastError();
+		uprintf("Could not configure wimlib output pipe: %s", WindowsErrorString());
+		goto out;
+	}
+	null_input = CreateFileA("NUL", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (null_input == INVALID_HANDLE_VALUE) {
+		exit_code = GetLastError();
+		goto out;
+	}
+
+	si.cb = sizeof(si);
+	si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+	si.wShowWindow = SW_HIDE;
+	si.hStdInput = null_input;
+	si.hStdOutput = output_write;
+	si.hStdError = output_write;
+	if (!CreateProcessU(NULL, cmdline, NULL, NULL, TRUE,
+		NORMAL_PRIORITY_CLASS | CREATE_NO_WINDOW, NULL, directory, &si, &pi)) {
+		exit_code = GetLastError();
+		uprintf("Could not start wimlib-imagex: %s", WindowsErrorString());
+		goto out;
+	}
+	CloseHandle(output_write);
+	output_write = INVALID_HANDLE_VALUE;
+
+	for (;;) {
+		if (IS_ERROR(ErrorStatus) && SCODE_CODE(ErrorStatus) == ERROR_CANCELLED) {
+			if (!TerminateProcess(pi.hProcess, ERROR_CANCELLED))
+				uprintf("Could not stop wimlib-imagex: %s", WindowsErrorString());
+			else
+				IGNORE_RETVAL(WaitForSingleObject(pi.hProcess, 5000));
+			exit_code = ERROR_CANCELLED;
+			goto out;
+		}
+
+		available = 0;
+		if (PeekNamedPipe(output_read, NULL, 0, NULL, &available, NULL) && (available != 0)) {
+			if (ReadFile(output_read, chunk, min(available, (DWORD)sizeof(chunk)), &bytes_read, NULL) &&
+				(bytes_read != 0)) {
+				for (i = 0; i < bytes_read; i++) {
+					if ((chunk[i] == '\r') || (chunk[i] == '\n')) {
+						if (line_length == 0)
+							continue;
+						line[line_length] = 0;
+						if (WimlibCommandProgress(line, joining, &progress)) {
+							displayed_progress = (int)(progress / 10);
+							// Non-incremented updates are ugly
+							UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, progress, 1000);
+							if ((progress == 1000) ||
+								(displayed_progress >= last_logged_progress + 10)) {
+								uprintf("%s Windows image: %d%%",
+									joining ? "Joining split" : "Applying",
+									displayed_progress);
+								last_logged_progress = displayed_progress;
+							}
+						}
+						else {
+							uprintf("%s", line);
+						}
+						line_length = 0;
+					}
+					else if (line_length < sizeof(line) - 1) {
+						line[line_length++] = chunk[i];
+					}
+				}
+			}
+		}
+
+		wait_result = WaitForSingleObject(pi.hProcess, process_done ? 0 : 100);
+		if (wait_result == WAIT_FAILED) {
+			exit_code = GetLastError();
+			goto out;
+		}
+		if (wait_result == WAIT_OBJECT_0) {
+			if (process_done && (available == 0))
+				break;
+			process_done = TRUE;
+		}
+	}
+
+	if (line_length != 0) {
+		line[line_length] = 0;
+		if (WimlibCommandProgress(line, joining, &progress))
+			UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, progress, 1000);
+		else
+			uprintf("%s", line);
+	}
+	if (!GetExitCodeProcess(pi.hProcess, &exit_code))
+		exit_code = GetLastError();
+
+out:
+	safe_closehandle(pi.hThread);
+	safe_closehandle(pi.hProcess);
+	safe_closehandle(null_input);
+	safe_closehandle(output_write);
+	safe_closehandle(output_read);
+	return exit_code;
+}
+
+BOOL WimJoinSplitImage(const char* directory, const char* output_name,
+	const char* part_stem, uint16_t part_count)
+{
+	const size_t command_length = 32768;
+	BOOL r = FALSE;
+	DWORD command_result;
+	char* cmdline = NULL, part_name[32], output_path[MAX_PATH];
+	size_t i;
+	struct __stat64 stat64 = { 0 };
+
+	if ((directory == NULL) || (output_name == NULL) || (part_stem == NULL) ||
+		(part_count == 0))
+		return FALSE;
+	if (!GetWimlibPath()) {
+		uprintf("wimlib-imagex is required to join split WIM images");
+		return FALSE;
+	}
+	cmdline = (char*)calloc(command_length, 1);
+	if (cmdline == NULL)
+		return FALSE;
+	safe_sprintf(cmdline, command_length, "\"%s\" join \"%s\"", wimlib_path, output_name);
+	for (i = 1; i <= part_count; i++) {
+		if (i == 1)
+			safe_sprintf(part_name, sizeof(part_name), "%s.swm", part_stem);
+		else
+			safe_sprintf(part_name, sizeof(part_name), "%s%u.swm", part_stem, (unsigned)i);
+		if (safe_strlen(cmdline) + safe_strlen(part_name) + 4 >= command_length) {
+			uprintf("Too many split WIM parts to construct the join command");
+			goto out;
+		}
+		safe_strcat(cmdline, command_length, " \"");
+		safe_strcat(cmdline, command_length, part_name);
+		safe_strcat(cmdline, command_length, "\"");
+	}
+
+	uprintf("Joining %u split WIM parts...", (unsigned)part_count);
+	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, 0, 100);
+	command_result = RunWimlibCommand(cmdline, directory, TRUE);
+	if (command_result != 0) {
+		if (command_result != ERROR_CANCELLED)
+			uprintf("wimlib-imagex join failed with exit code %lu", command_result);
+		goto out;
+	}
+	static_sprintf(output_path, "%s\\%s", directory, output_name);
+	r = (_stat64U(output_path, &stat64) == 0) && (stat64.st_size > 0);
+	if (r)
+		UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, 100, 100);
+	else
+		uprintf("wimlib-imagex did not create the joined Windows image");
+
+out:
+	free(cmdline);
+	return r;
+}
+
+static DWORD WimlibApplyImage(const char* image, int index, const char* dst)
+{
+	DWORD command_result;
+	char cmdline[4 * MAX_PATH], target[MAX_PATH];
+
+	static_sprintf(target, "%s%s", dst, (dst[safe_strlen(dst) - 1] == '\\') ? "." : "\\.");
+	static_sprintf(cmdline, "\"%s\" apply \"%s\" %d \"%s\"", wimlib_path, image, index, target);
+	uprintf("Applying Windows image using wimlib-imagex...");
+	UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, 0, 100);
+	command_result = RunWimlibCommand(cmdline, app_data_dir, FALSE);
+	if (command_result != 0) {
+		if (command_result != ERROR_CANCELLED)
+			uprintf("wimlib-imagex failed with exit code %lu", command_result);
+	}
+	else {
+		UpdateProgressWithInfo(OP_FILE_COPY, MSG_267, 100, 100);
+		wim_nb_files = 1;
+		wim_proc_files = 1;
+		wim_extra_files = 0;
+	}
+	return command_result;
+}
+
 BOOL WimApplyImage(const char* image, int index, const char* dst)
 {
-	DWORD dw = 0;
+	DWORD dw = 0, command_result;
 	mount_params_t mp = { 0 };
+	uint8_t methods = WimExtractCheck(TRUE);
+
+	if ((image == NULL) || (dst == NULL) || (dst[0] == 0) || (index <= 0))
+		return FALSE;
 	mp.image = image;
 	mp.index = index;
 	mp.dst = dst;
 
-	wim_thread = CreateThread(NULL, 0, WimApplyImageThread, &mp, 0, NULL);
-	if (wim_thread == NULL) {
-		uprintf("Unable to start apply-image thread");
-		return FALSE;
+	// wimlib for < 8, wimgapi for 8+ (port) 
+	if ((WindowsVersion.Version < WINDOWS_8) && (methods & WIM_HAS_WIMLIB_APPLY)) {
+		command_result = WimlibApplyImage(image, index, dst);
+		if (command_result == 0)
+			return TRUE;
+		if (command_result == ERROR_CANCELLED ||
+			(IS_ERROR(ErrorStatus) && SCODE_CODE(ErrorStatus) == ERROR_CANCELLED))
+			return FALSE;
 	}
-	SetThreadPriority(wim_thread, default_thread_priority);
-	WaitForSingleObject(wim_thread, INFINITE);
-	if (!GetExitCodeThread(wim_thread, &dw))
-		dw = 0;
-	wim_thread = NULL;
-	return dw;
+
+	if (methods & WIM_HAS_API_APPLY) {
+		wim_thread = CreateThread(NULL, 0, WimApplyImageThread, &mp, 0, NULL);
+		if (wim_thread == NULL) {
+			uprintf("Unable to start apply-image thread");
+		}
+		else {
+			SetThreadPriority(wim_thread, default_thread_priority);
+			WaitForSingleObject(wim_thread, INFINITE);
+			if (!GetExitCodeThread(wim_thread, &dw))
+				dw = 0;
+			wim_thread = NULL;
+			if (dw != 0)
+				return TRUE;
+			if (IS_ERROR(ErrorStatus) && SCODE_CODE(ErrorStatus) == ERROR_CANCELLED)
+				return FALSE;
+		}
+	}
+
+	return FALSE;
 }
 
 // Mount an ISO or a VHD/VHDX image and provide its size
