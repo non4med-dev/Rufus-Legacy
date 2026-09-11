@@ -8,9 +8,8 @@ The original project can be found [under this link.](https://github.com/pbatard/
 Important Notes
 ---------------
 
-DBX updates are currently broken. Follow pull [#468](https://github.com/microsoft/secureboot_objects/pull/468) and thread [#3039](https://github.com/pbatard/rufus/issues/3039) for more information.<br>
-Rufus already contains embedded copies of these files, so no functionality should be affected.<br>
-The most recent dbx files of this format can still be found inside winxp-win2k.zip<br>
+Release v1.1 has been pulled down because of an issue with Windows 2000 - Windows Vista not having wimgapi.dll. I will look into it tommorow. It's been pulled down for now. Sorry!
+DBX updating will be fixed in the next update, GRUB and UEFI:NTFS will be updated, and I will work towards adding the Rufus Quality Of Life (Windows 10-11 pre-patching) feature, coming s0n ;)
 
 Features
 --------
