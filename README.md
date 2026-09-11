@@ -9,7 +9,6 @@ Important Notes
 ---------------
 
 Release v1.1 has been pulled down because of an issue with Windows 2000 - Windows Vista not having wimgapi.dll. I will look into it tommorow. Sorry!
-DBX updating will be fixed in the next update, GRUB and UEFI:NTFS will be updated, and I will work towards adding the Rufus Quality Of Life (Windows 10-11 pre-patching) feature, coming s0n ;)
 
 Features
 --------
