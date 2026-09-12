@@ -51,7 +51,7 @@ Changes
 
 Unavailable Features
 --------------------
-Windows Vista and 7 -> VDS, VHDX and FFU, ReFS
+Windows Vista and 7 -> VDS, VHDX and FFU, ReFS<br>
 Windows 2000 and XP -> DBX Update Checks, Fido
 
 Future Plans
