@@ -1588,14 +1588,12 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
 	if (sbatlevel == NULL)
 		return NULL;
 
-	num_entries = 0;
+	num_entries = 1;
 	for (i = 0; sbatlevel[i] != '\0'; i++)
 		if (sbatlevel[i] == '\n')
 			num_entries++;
 
-	if (num_entries == 0)
-		return NULL;
-	_sbat_entries = calloc(num_entries + 2, sizeof(sbat_entry_t));
+	_sbat_entries = calloc(num_entries + 1, sizeof(sbat_entry_t));
 	if (_sbat_entries == NULL)
 		return NULL;
 
@@ -1634,8 +1632,58 @@ sbat_entry_t* GetSbatEntries(char* sbatlevel)
 		if (_sbat_entries[num_entries].version != 0)
 			num_entries++;
 	}
+	if (num_entries == 0) {
+		free(_sbat_entries);
+		return NULL;
+	}
 
 	return _sbat_entries;
+}
+
+// Parse certificate thumbprints used by the Secure Boot reports (for a later update ;)
+thumbprint_list_t* GetThumbprintEntries(char* thumbprints_txt)
+{
+	uint32_t i, j, num_entries;
+	thumbprint_list_t* thumbprints;
+
+	if (thumbprints_txt == NULL)
+		return NULL;
+	num_entries = 1;
+	for (i = 0; thumbprints_txt[i] != '\0'; i++)
+		if (thumbprints_txt[i] == '\n')
+			num_entries++;
+	thumbprints = (thumbprint_list_t*)calloc(1,
+		sizeof(thumbprint_list_t) + num_entries * SHA1_HASHSIZE);
+	if (thumbprints == NULL)
+		return NULL;
+
+	for (i = 0; thumbprints_txt[i] != '\0'; ) {
+		if (thumbprints_txt[i] == '\n') {
+			i++;
+			continue;
+		}
+		if (!IS_HEXASCII(thumbprints_txt[i])) {
+			while (thumbprints_txt[i] != '\n' && thumbprints_txt[i] != '\0')
+				i++;
+			continue;
+		}
+		memset(thumbprints->list[thumbprints->count], 0, SHA1_HASHSIZE);
+		for (j = 0; thumbprints_txt[i] != '\n' && thumbprints_txt[i] != '\0'; i++, j++) {
+			if (!IS_HEXASCII(thumbprints_txt[i]) || (j / 2) >= SHA1_HASHSIZE)
+				break;
+			thumbprints->list[thumbprints->count][j / 2] <<= 4;
+			thumbprints->list[thumbprints->count][j / 2] |= FROM_HEXASCII(thumbprints_txt[i]);
+			if (j == 2 * SHA1_HASHSIZE - 1)
+				thumbprints->count++;
+		}
+		while (thumbprints_txt[i] != '\n' && thumbprints_txt[i] != '\0')
+			i++;
+	}
+	if (thumbprints->count == 0) {
+		free(thumbprints);
+		return NULL;
+	}
+	return thumbprints;
 }
 
 /*

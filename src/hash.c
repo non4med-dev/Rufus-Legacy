@@ -115,7 +115,7 @@ StrArray modified_files = { 0 };
 
 extern int default_thread_priority;
 extern const char* efi_archname[ARCH_MAX];
-extern char* sbat_level_txt;
+extern char* sbat_level_txt, * sb_active_txt, * sb_revoked_txt;
 extern BOOL expert_mode, usb_debug;
 
 /*
@@ -2164,6 +2164,11 @@ static BOOL IsRevokedBySbat(uint8_t* buf, uint32_t len)
 	uint32_t i, j, sbat_len;
 	sbat_entry_t entry;
 
+	if (sbat_entries == NULL) {
+		safe_free(sbat_level_txt);
+		sbat_level_txt = safe_strdup(db_sbat_level_txt);
+		sbat_entries = GetSbatEntries(sbat_level_txt);
+	}
 	if (sbat_entries == NULL)
 		return FALSE;
 
@@ -2312,13 +2317,21 @@ static BOOL IsRevokedBySvn(uint8_t* buf, uint32_t len)
 
 static BOOL IsRevokedByCert(cert_info_t* info)
 {
-	int i;
+	uint32_t i;
 
-	for (i = 0; i < ARRAYSIZE(certdbx); i += SHA1_HASHSIZE) {
-		if (!expert_mode)
-			continue;
-		if (memcmp(info->thumbprint, &certdbx[i], SHA1_HASHSIZE) == 0) {
-			uprintf("Found '%s' revoked certificate", info->name);
+	if (!expert_mode)
+		return FALSE;
+	// Use local if remote isnt available
+	if (sb_revoked_certs == NULL) {
+		safe_free(sb_revoked_txt);
+		sb_revoked_txt = safe_strdup(db_sb_revoked_txt);
+		sb_revoked_certs = GetThumbprintEntries(sb_revoked_txt);
+	}
+	if (sb_revoked_certs == NULL)
+		return FALSE;
+	for (i = 0; i < sb_revoked_certs->count; i++) {
+		if (memcmp(info->thumbprint, sb_revoked_certs->list[i], SHA1_HASHSIZE) == 0) {
+			uprintf("  Found '%s' revoked certificate", info->name);
 			return TRUE;
 		}
 	}
@@ -2339,8 +2352,16 @@ BOOL IsSignedBySecureBootAuthority(uint8_t* buf, uint32_t len)
 	// Secure Boot Authority is always an issuer
 	if (GetIssuerCertificateInfo(cert, &info) != 2)
 		return FALSE;
-	for (i = 0; i < ARRAYSIZE(certauth); i += SHA1_HASHSIZE) {
-		if (memcmp(info.thumbprint, &certauth[i], SHA1_HASHSIZE) == 0)
+	// Use local if remote isnt available
+	if (sb_active_certs == NULL) {
+		safe_free(sb_active_txt);
+		sb_active_txt = safe_strdup(db_sb_active_txt);
+		sb_active_certs = GetThumbprintEntries(sb_active_txt);
+	}
+	if (sb_active_certs == NULL)
+		return FALSE;
+	for (i = 0; i < sb_active_certs->count; i++) {
+		if (memcmp(info.thumbprint, sb_active_certs->list[i], SHA1_HASHSIZE) == 0)
 			return TRUE;
 	}
 	return FALSE;
@@ -2353,15 +2374,9 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 	IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*)buf;
 	IMAGE_NT_HEADERS32* pe_header;
 	uint8_t* cert;
-	// Initialize certificate details because Windows 2000 may continue after chain lookup fails (port-AI)
+	// Keep certificate details initialized when W2k cant build the issuer chain (port)
 	cert_info_t info = { 0 };
-	int r;
-
-	// Fall back to embedded sbat_level.txt if we couldn't access remote
-	if (sbat_entries == NULL) {
-		sbat_level_txt = safe_strdup(db_sbat_level_txt);
-		sbat_entries = GetSbatEntries(sbat_level_txt);
-	}
+	int r, revoked = 0;
 
 	if (buf == NULL || len < 0x100 || dos_header->e_magic != IMAGE_DOS_SIGNATURE)
 		return -2;
@@ -2381,21 +2396,38 @@ int IsBootloaderRevoked(uint8_t* buf, uint32_t len)
 		return -1;
 	// Check for UEFI DBX revocation
 	if (IsRevokedByDbx(hash, buf, len))
-		return 1;
+		revoked = 1;
 	// Check for Microsoft SSP revocation
-	for (i = 0; i < pe256ssp_size * SHA256_HASHSIZE; i += SHA256_HASHSIZE)
+	for (i = 0; revoked == 0 && i < pe256ssp_size * SHA256_HASHSIZE; i += SHA256_HASHSIZE)
 		if (memcmp(hash, &pe256ssp[i], SHA256_HASHSIZE) == 0)
-			return 2;
+			revoked = 2;
 	// Check for Linux SBAT revocation
-	if (IsRevokedBySbat(buf, len))
-		return 3;
+	if (revoked == 0 && IsRevokedBySbat(buf, len))
+		revoked = 3;
 	// Check for Microsoft SVN revocation
-	if (IsRevokedBySvn(buf, len))
-		return 4;
+	if (revoked == 0 && IsRevokedBySvn(buf, len))
+		revoked = 4;
 	// Check for UEFI DBX certificate revocation
-	if (IsRevokedByCert(&info))
-		return 5;
-	return 0;
+	if (revoked == 0 && IsRevokedByCert(&info))
+		revoked = 5;
+
+	// If signed and not revoked, print the various Secure Boot "gotchas"
+	if (r > 0 && revoked == 0) {
+		if (strcmp(info.name, "Microsoft Windows Production PCA 2011") == 0) {
+			uprintf("  Note: This bootloader may fail Secure Boot validation on systems that");
+			uprintf("  have been updated to use the 'Windows UEFI CA 2023' certificate.");
+		}
+		else if (strcmp(info.name, "Windows UEFI CA 2023") == 0) {
+			uprintf("  Note: This bootloader will fail Secure Boot validation on systems that");
+			uprintf("  have not been updated to use the latest Secure Boot certificates");
+		}
+		else if (strcmp(info.name, "Microsoft Corporation UEFI CA 2011") == 0 ||
+			strcmp(info.name, "Microsoft UEFI CA 2023") == 0) {
+			uprintf("  Note: This bootloader may fail Secure Boot validation on some systems,");
+			uprintf("  unless 'Microsoft 3rd-party UEFI CA' is enabled in firmware.");
+		}
+	}
+	return revoked;
 }
 
 /*

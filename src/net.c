@@ -320,17 +320,19 @@ static HINTERNET GetInternetSession(const char* user_agent, BOOL bRetry)
 uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char* user_agent,
 	BYTE** buffer, HWND hProgressDialog, BOOL bTaskBarProgress)
 {
-	const char* accept_types[] = {"*/*\0", NULL};
+	const char* accept_types[] = { "*/*\0", NULL };
 	const char* short_name;
 	unsigned char buf[DOWNLOAD_BUFFER_SIZE];
-	char hostname[64], urlpath[128], strsize[32];
-	BOOL r = FALSE, use_github_api;
+	char hostname[64], urlpath[128], strsize[32] = { 0 };
+	BOOL r = FALSE, use_github_api, has_content_length = FALSE;
 	DWORD dwSize, dwWritten, dwDownloaded;
+	BYTE* resized_buffer;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	HINTERNET hSession = NULL, hConnection = NULL, hRequest = NULL;
 	URL_COMPONENTSA UrlParts = { sizeof(URL_COMPONENTSA), NULL, 1, (INTERNET_SCHEME)0,
 		hostname, sizeof(hostname), 0, NULL, 1, urlpath, sizeof(urlpath), NULL, 1 };
 	uint64_t size = 0, total_size = 0;
+	size_t buffer_capacity = 0, required_capacity, new_capacity;
 
 	ErrorStatus = 0;
 	DownloadStatus = 404;
@@ -411,17 +413,15 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 		uprintf("%s '%s': %d", (DownloadStatus == 404) ? "File not found" : "Unable to access file", url, DownloadStatus);
 		goto out;
 	}
-	dwSize = sizeof(strsize);
-	if (!HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH, (LPVOID)strsize, &dwSize, NULL)) {
-		// Note: The following line
-		// len = DownloadToFileOrBuffer(RUFUS_URL "/sbat_level.txt", NULL, (BYTE**)&sbat_level_txt, NULL, FALSE);
-		// Causes the error down below on Windows 7 and Vista. I dont know why it fails and I'm too lazy to find care
-		// sbat has a hardcoded fallback and uses dbx files anyways
-		uprintf("Unable to retrieve file length: %s", WindowsErrorString());
-		goto out;
+	dwSize = sizeof(strsize) - 1;
+	has_content_length = HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH,
+		(LPVOID)strsize, &dwSize, NULL);
+	if (has_content_length) {
+		strsize[dwSize] = 0;
+		total_size = strtoull(strsize, NULL, 10);
 	}
-	total_size = strtoull(strsize, NULL, 10);
-	if (hProgressDialog != NULL) {
+
+	if (hProgressDialog != NULL && has_content_length) {
 		char msg[128];
 		uprintf("File length: %s", SizeToHumanReadable(total_size, FALSE, FALSE));
 		if (right_to_left_mode)
@@ -442,8 +442,14 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 			uprintf("No buffer pointer provided for download");
 			goto out;
 		}
-		// Allocate one extra byte, so that caller can rely on NUL-terminated text if needed
-		*buffer = calloc((size_t)total_size + 2, 1);
+		// Start off with a normal block if final response is unknown
+		// Why do you gotta be like that sbat?
+		if (has_content_length && total_size > (uint64_t)(SIZE_MAX - 2)) {
+			uprintf("Download is too large for this process");
+			goto out;
+		}
+		buffer_capacity = has_content_length ? (size_t)total_size + 2 : DOWNLOAD_BUFFER_SIZE + 2;
+		*buffer = calloc(buffer_capacity, 1);
 		if (*buffer == NULL) {
 			uprintf("Could not allocate buffer for download");
 			goto out;
@@ -455,33 +461,67 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 		// User may have cancelled the download
 		if (IS_ERROR(ErrorStatus))
 			goto out;
-		if (!InternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded) || (dwDownloaded == 0))
+		if (!InternetReadFile(hRequest, buf, sizeof(buf), &dwDownloaded)) {
+			uprintf("Error reading download: %s", WindowsErrorString());
+			goto out;
+		}
+		if (dwDownloaded == 0)
 			break;
-		if (hProgressDialog != NULL)
+		if (hProgressDialog != NULL && has_content_length)
 			UpdateProgressWithInfo(OP_NOOP, MSG_241, size, total_size);
 		if (file != NULL) {
 			if (!WriteFile(hFile, buf, dwDownloaded, &dwWritten, NULL)) {
 				uprintf("Error writing file '%s': %s", short_name, WindowsErrorString());
 				goto out;
-			} else if (dwDownloaded != dwWritten) {
+			}
+			else if (dwDownloaded != dwWritten) {
 				uprintf("Error writing file '%s': Only %d/%d bytes written", short_name, dwWritten, dwDownloaded);
 				goto out;
 			}
-		} else {
+		}
+		else {
+			// Grow memory downloads as data arrives when the server uses chunked transfer encoding
+			if (size > (uint64_t)(SIZE_MAX - dwDownloaded - 2)) {
+				uprintf("Download is too large for this process");
+				goto out;
+			}
+			required_capacity = (size_t)size + dwDownloaded + 2;
+			if (required_capacity > buffer_capacity) {
+				new_capacity = buffer_capacity;
+				while (new_capacity < required_capacity && new_capacity <= SIZE_MAX / 2)
+					new_capacity *= 2;
+				if (new_capacity < required_capacity)
+					new_capacity = required_capacity;
+				resized_buffer = (BYTE*)realloc(*buffer, new_capacity);
+				if (resized_buffer == NULL) {
+					uprintf("Could not grow download buffer");
+					goto out;
+				}
+				*buffer = resized_buffer;
+				buffer_capacity = new_capacity;
+			}
 			memcpy(&(*buffer)[size], buf, dwDownloaded);
 		}
 		size += dwDownloaded;
 	}
 
-	if (size != total_size) {
+	if (buffer != NULL) {
+		(*buffer)[size] = 0;
+		(*buffer)[size + 1] = 0;
+	}
+	if (has_content_length && size != total_size) {
 		uprintf("Could not download complete file - read: %lld bytes, expected: %lld bytes", size, total_size);
 		ErrorStatus = RUFUS_ERROR(ERROR_WRITE_FAULT);
 		goto out;
-	} else {
+	}
+	else {
 		DownloadStatus = 200;
 		r = TRUE;
+		// No
+		SetLastError(ERROR_SUCCESS);
 		if (hProgressDialog != NULL) {
-			UpdateProgressWithInfo(OP_NOOP, MSG_241, total_size, total_size);
+			if (has_content_length)
+				UpdateProgressWithInfo(OP_NOOP, MSG_241, total_size, total_size);
 			uprintf("Successfully downloaded '%s'", short_name);
 		}
 	}
@@ -489,7 +529,6 @@ uint64_t DownloadToFileOrBufferEx(const char* url, const char* file, const char*
 out:
 	error_code = GetLastError();
 	if (hFile != INVALID_HANDLE_VALUE) {
-		// Force a flush - May help with the PKI API trying to process downloaded updates too early...
 		FlushFileBuffers(hFile);
 		CloseHandle(hFile);
 	}
@@ -611,10 +650,11 @@ static __inline uint64_t to_uint64_t(uint16_t x[3]) {
 BOOL UseLocalDbx(int arch)
 {
 	char reg_name[32], path[MAX_PATH];
-	if (WindowsVersion.Version < WINDOWS_VISTA) {
-		static_sprintf(path, "%s\\%s\\dbx_%s.bin", app_data_dir, FILES_DIR, efi_archname[arch]);
-		return _accessU(path, 0) != -1;
-	}
+	static_sprintf(path, "%s\\%s\\dbx_%s.bin", app_data_dir, FILES_DIR, efi_archname[arch]);
+	if (_accessU(path, 0) == -1)
+		return FALSE;
+	if (WindowsVersion.Version < WINDOWS_VISTA)
+		return TRUE;
 	static_sprintf(reg_name, "DBXTimestamp_%s", efi_archname[arch]);
 	return (uint64_t)ReadSetting64(reg_name) > dbx_info[arch - 1].timestamp;
 }
@@ -622,8 +662,8 @@ BOOL UseLocalDbx(int arch)
 static void CheckForDBXUpdates(int verbose)
 {
 	int i, r;
-	char reg_name[32], timestamp_url[256], path[MAX_PATH];
-	char *p, *c, *rep, *buf = NULL;
+	char reg_name[32], timestamp_url[256], path[MAX_PATH], directory[MAX_PATH];
+	char* p, * c, * rep, * buf = NULL;
 	struct tm t = { 0 };
 	uint64_t size, timestamp;
 	BOOL already_prompted = FALSE;
@@ -670,7 +710,10 @@ static void CheckForDBXUpdates(int verbose)
 		vuprintf("DBX update timestamp is %" PRId64, timestamp);
 		static_sprintf(reg_name, "DBXTimestamp_%s", efi_archname[i + 1]);
 		// Check if we have an external DBX that is newer than embedded/last downloaded
-		if (timestamp <= MAX(dbx_info[i].timestamp, (uint64_t)ReadSetting64(reg_name)))
+		if (timestamp <= dbx_info[i].timestamp)
+			continue;
+		static_sprintf(path, "%s\\%s\\dbx_%s.bin", app_data_dir, FILES_DIR, efi_archname[i + 1]);
+		if (PathFileExistsU(path) && timestamp <= (uint64_t)ReadSetting64(reg_name))
 			continue;
 		if (!already_prompted) {
 			r = MessageBoxExU(hMainDialog, lmprintf(MSG_354), lmprintf(MSG_353),
@@ -678,17 +721,18 @@ static void CheckForDBXUpdates(int verbose)
 			already_prompted = TRUE;
 			if (r != IDYES)
 				break;
-			static_sprintf(path, "%s\\%s", app_data_dir, FILES_DIR);
-			if ((_mkdirU(path) != 0) && (errno != EEXIST)) {
-				uprintf("Warning: Could not create DBX update directory '%s'", path);
+			// Create the parent directory
+			static_sprintf(directory, "%s\\%s", app_data_dir, FILES_DIR);
+			if ((_mkdirU(directory) != 0) && (errno != EEXIST)) {
+				uprintf("Warning: Could not create DBX update directory '%s'", directory);
 				break;
 			}
 		}
-		static_sprintf(path, "%s\\%s\\dbx_%s.bin", app_data_dir, FILES_DIR, efi_archname[i + 1]);
 		if (DownloadToFileOrBuffer(dbx_info[i].url, path, NULL, NULL, FALSE) != 0) {
 			WriteSetting64(reg_name, timestamp);
 			uprintf("Saved %s as 'dbx_%s.bin'", dbx_info[i].url, efi_archname[i + 1]);
-		} else
+		}
+		else
 			uprintf("Warning: Failed to download %s", dbx_info[i].url);
 	}
 }
@@ -1069,7 +1113,7 @@ static DWORD WINAPI DownloadISOThread(LPVOID param)
 	}
 	uprintf("Script signature is valid ✓");
 
-	// Fido patch signature bypass (idk if its still relevant, this codebase is bullshit) (port)
+	// FIDO PATCH (port)
 	if (is_vista || is_seven) {
 		version_line = strstr((char*)fido_script, "$winver =");
 		version_eol = (version_line == NULL) ? NULL : strchr(version_line, '\n');

@@ -144,15 +144,16 @@ char app_data_dir[MAX_PATH], user_dir[MAX_PATH], cur_dir[MAX_PATH];
 char embedded_sl_version_str[2][12] = { "?.??", "?.??" };
 char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
-char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
-char *archive_path = NULL, image_option_txt[128], *fido_url = NULL, *save_image_type = NULL;
-char* sbat_level_txt = NULL, * sb_active_txt = NULL, * sb_revoked_txt = NULL;
+char msgbox[1024], msgbox_title[32], * ini_file = NULL, *image_path = NULL, *short_image_path;
+char* archive_path = NULL, image_option_txt[128], *fido_url = NULL, *save_image_type = NULL;
+char* sbat_level_txt = NULL, *sb_active_txt = NULL, *sb_revoked_txt = NULL;
 StrArray BlockingProcessList, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
 const char* flash_type[BADLOCKS_PATTERN_TYPES] = { "SLC", "MLC", "TLC" };
 RUFUS_DRIVE rufus_drive[MAX_DRIVES] = { 0 };
 sbat_entry_t* sbat_entries = NULL;
+thumbprint_list_t* sb_active_certs = NULL, *sb_revoked_certs = NULL;
 
 // TODO: Remember to update copyright year in stdlg's AboutCallback() WM_INITDIALOG,
 // localization_data.sh and the .rc when the year changes!
@@ -1455,7 +1456,7 @@ static DWORD WINAPI BootCheckThread(LPVOID param)
 	const char* ldlinux = "ldlinux";
 	const char* syslinux = "syslinux";
 	const char* ldlinux_ext[3] = { "sys", "bss", "c32" };
-	char tmp[MAX_PATH], tmp2[MAX_PATH], c;
+	char tmp[MAX_PATH] = { 0 }, tmp2[MAX_PATH] = { 0 }, c = 0;
 
 	syslinux_ldlinux_len[0] = 0; syslinux_ldlinux_len[1] = 0;
 	is_bootloader_revoked = FALSE;

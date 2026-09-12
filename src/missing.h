@@ -35,6 +35,9 @@
 
 #define IS_HEXASCII(c) (((c) >= '0' && (c) <= '9') || ((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
 
+#define FROM_HEXASCII(c) (((c) >= '0' && (c) <= '9') ? (c) - '0' : (((c) >= 'A' && (c) <= 'F') ? (c) - 'A' + 10 : \
+	(((c) >= 'a' && (c) <= 'f') ? (c) - 'a' + 10 : 0)))
+
 /*
  * Prefetch 64 bytes at address m, for read-only operation
  * We account for these built-in calls doing nothing if the

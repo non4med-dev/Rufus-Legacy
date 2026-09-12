@@ -563,6 +563,12 @@ typedef struct {
 	uint8_t thumbprint[SHA1_HASHSIZE];
 } cert_info_t;
 
+/* Store parsed thumbprints (port) */
+typedef struct {
+	uint32_t count;
+	uint8_t list[0][SHA1_HASHSIZE];
+} thumbprint_list_t;
+
 /* Hash functions */
 typedef void hash_init_t(HASH_CONTEXT* ctx);
 typedef void hash_write_t(HASH_CONTEXT* ctx, const uint8_t* buf, size_t len);
@@ -736,6 +742,7 @@ extern const int nb_steps[FS_MAX];
 extern float fScale;
 extern windows_version_t WindowsVersion;
 extern sbat_entry_t* sbat_entries;
+extern thumbprint_list_t *sb_active_certs, *sb_revoked_certs;
 extern int dialog_showing, force_update, fs_type, boot_type, partition_type, target_type;
 extern unsigned long syslinux_ldlinux_len[2];
 extern char ubuffer[UBUFFER_SIZE], embedded_sl_version_str[2][12];
@@ -882,6 +889,7 @@ extern HANDLE CreatePreallocatedFile(const char* lpFileName, DWORD dwDesiredAcce
 	DWORD dwFlagsAndAttributes, LONGLONG fileSize);
 extern uint32_t ResolveDllAddress(dll_resolver_t* resolver);
 extern sbat_entry_t* GetSbatEntries(char* sbatlevel);
+extern thumbprint_list_t* GetThumbprintEntries(char* thumbprints_txt);
 extern uint16_t GetPeArch(uint8_t* buf);
 extern uint8_t* GetPeSection(uint8_t* buf, const char* name, uint32_t* len);
 extern uint8_t* GetPeSignatureData(uint8_t* buf);
@@ -911,7 +919,7 @@ extern uint16_t OpenedLibrariesHandleSize;
 #define         OPENED_LIBRARIES_VARS HMODULE OpenedLibrariesHandle[MAX_LIBRARY_HANDLES]; uint16_t OpenedLibrariesHandleSize = 0
 #define         CLOSE_OPENED_LIBRARIES while(OpenedLibrariesHandleSize > 0) FreeLibrary(OpenedLibrariesHandle[--OpenedLibrariesHandleSize])
 
-static __inline HMODULE GetLibraryHandle(char* szLibraryName)
+/* static __inline HMODULE GetLibraryHandle(char* szLibraryName)
 {
 	HMODULE h = NULL;
 	wchar_t* wszLibraryName = NULL;
@@ -961,6 +969,77 @@ static __inline HMODULE GetLibraryHandle(char* szLibraryName)
 			h = LoadLibraryW(wszSystemPath);
 			if (h == NULL)
 				load_error = GetLastError();
+		}
+		else {
+			load_error = ERROR_INSUFFICIENT_BUFFER;
+		}
+	}
+
+	if (h != NULL) {
+		OpenedLibrariesHandle[OpenedLibrariesHandleSize++] = h;
+	}
+	else {
+		SetLastError(load_error);
+		uprintf("Unable to load '%S': %s",
+			wszLibraryName, WindowsErrorString());
+	}
+
+out:
+	free(wszLibraryName);
+	return h;
+} */
+
+// TEST #5
+static __inline HMODULE GetLibraryHandle(char* szLibraryName)
+{
+	HMODULE h = NULL;
+	wchar_t* wszLibraryName = NULL;
+	wchar_t wszSystemPath[MAX_PATH];
+	DWORD path_length, load_error = ERROR_SUCCESS;
+	size_t extension_length, name_length;
+	BOOL has_extension;
+	int size;
+
+	if ((szLibraryName == NULL) || (szLibraryName[0] == 0))
+		goto out;
+
+	size = MultiByteToWideChar(CP_UTF8, 0, szLibraryName, -1, NULL, 0);
+	if ((size <= 1) ||
+		((wszLibraryName = (wchar_t*)calloc(size, sizeof(wchar_t))) == NULL) ||
+		(MultiByteToWideChar(CP_UTF8, 0, szLibraryName, -1,
+			wszLibraryName, size) != size))
+		goto out;
+
+	h = GetModuleHandleW(wszLibraryName);
+	if (h != NULL)
+		goto out;
+
+	if (OpenedLibrariesHandleSize >= MAX_LIBRARY_HANDLES) {
+		uprintf("Error: MAX_LIBRARY_HANDLES is too small\n");
+		goto out;
+	}
+
+	// Use secure-search flags if available, and absolute paths on older/unupdated hosts
+	if (WindowsVersion.Version >= WINDOWS_7) {
+		h = LoadLibraryExW(wszLibraryName, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+		load_error = GetLastError();
+	}
+	if (h == NULL && (WindowsVersion.Version < WINDOWS_7 ||
+		load_error == ERROR_INVALID_PARAMETER)) {
+		path_length = GetSystemDirectoryW(wszSystemPath, ARRAYSIZE(wszSystemPath));
+		name_length = wcslen(wszLibraryName);
+		has_extension = (wcsrchr(wszLibraryName, L'.') != NULL);
+		extension_length = has_extension ? 0 : 4;
+		if (path_length != 0 && path_length < ARRAYSIZE(wszSystemPath) &&
+			path_length + 1 + name_length + extension_length + 1 <= ARRAYSIZE(wszSystemPath)) {
+			wszSystemPath[path_length++] = L'\\';
+			memcpy(&wszSystemPath[path_length], wszLibraryName,
+				(name_length + 1) * sizeof(wchar_t));
+			path_length += (DWORD)name_length;
+			if (!has_extension)
+				memcpy(&wszSystemPath[path_length], L".dll", 5 * sizeof(wchar_t));
+			h = LoadLibraryW(wszSystemPath);
+			load_error = GetLastError();
 		}
 		else {
 			load_error = ERROR_INSUFFICIENT_BUFFER;
