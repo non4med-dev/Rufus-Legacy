@@ -8,7 +8,7 @@ The original project can be found [under this link.](https://github.com/pbatard/
 Important Notes
 ---------------
 
-RC2 has been temporarilly pulled down to fix a bunch of Windows To Go related bugs on NT5.
+RC2 has been temporarily pulled down to fix a bunch of Windows To Go related bugs on NT5.
 
 Features
 --------
