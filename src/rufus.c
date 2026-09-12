@@ -146,7 +146,7 @@ char embedded_sl_version_ext[2][32];
 char ClusterSizeLabel[MAX_CLUSTER_SIZES][64];
 char msgbox[1024], msgbox_title[32], *ini_file = NULL, *image_path = NULL, *short_image_path;
 char *archive_path = NULL, image_option_txt[128], *fido_url = NULL, *save_image_type = NULL;
-char* sbat_level_txt = NULL;
+char* sbat_level_txt = NULL, * sb_active_txt = NULL, * sb_revoked_txt = NULL;
 StrArray BlockingProcessList, ImageList;
 // Number of steps for each FS for FCC_STRUCTURE_PROGRESS
 const int nb_steps[FS_MAX] = { 5, 5, 12, 1, 10, 1, 1, 1, 1 };
@@ -3336,10 +3336,22 @@ static HANDLE SetHogger(void)
 FARPROC WINAPI dllDelayLoadHook(unsigned dliNotify, PDelayLoadInfo pdli)
 {
 	if (dliNotify == dliNotePreLoadLibrary) {
-		// Windows 7 without KB2533623 does not support the LOAD_LIBRARY_SEARCH_SYSTEM32 flag.
-		// That is OK, because the delay load handler will interrupt the NULL return value
-		// to mean that it should perform a normal LoadLibrary.
-		return (FARPROC)LoadLibraryExA(pdli->szDll, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+		HMODULE module;
+		DWORD length;
+		char system_path[MAX_PATH];
+
+		module = LoadLibraryExA(pdli->szDll, NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+		// Prevent delay loader from falling back to current dir on hosts without secure-search flags
+		if (module == NULL && GetLastError() == ERROR_INVALID_PARAMETER) {
+			length = GetSystemDirectoryA(system_path, ARRAYSIZE(system_path));
+			if (length != 0 && length < ARRAYSIZE(system_path) &&
+				length + 1 + safe_strlen(pdli->szDll) + 1 <= ARRAYSIZE(system_path)) {
+				system_path[length++] = '\\';
+				safe_strcpy(&system_path[length], ARRAYSIZE(system_path) - length, pdli->szDll);
+				module = LoadLibraryA(system_path);
+			}
+		}
+		return (FARPROC)module;
 	}
 	return NULL;
 }
@@ -3391,6 +3403,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		{0, 0, NULL, 0}
 	};
 
+	GetWindowsVersion(&WindowsVersion);
+
 	// Disable loading system DLLs from the current directory (side-loading mitigation)
 	// PS: You know that official MSDN documentation for SetDllDirectory() that explicitly
 	// indicates that "If the parameter is an empty string (""), the call removes the current
@@ -3418,7 +3432,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// current directories.
 
 	// Windows Vista's implementation is FUCKING ASS.
-	// It's the reason theming broke on Vista in the last release (port)
+	// This is the reason theming broke in the last release. (port)
 	if (WindowsVersion.Version >= WINDOWS_7)
 		SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
 
@@ -3717,8 +3731,8 @@ skip_args_processing:
 	enable_vmdk = ReadSettingBool(SETTING_ENABLE_VMDK_DETECTION);
 	enable_file_indexing = ReadSettingBool(SETTING_ENABLE_FILE_INDEXING);
 	enable_VHDs = !ReadSettingBool(SETTING_DISABLE_VHDS);
-	// Test #1
-	enable_windows_to_go = (WindowsVersion.Version > WINDOWS_2000) &&
+	// Read Windows To Go setting
+	enable_windows_to_go = (WindowsVersion.Version >= WINDOWS_2000) &&
 		((WindowsVersion.Version >= WINDOWS_8) ||
 			!ReadSettingBool(SETTING_DISABLE_WINDOWS_TO_GO));
 	// enable_windows_to_go = (WindowsVersion.Version >= WINDOWS_8) ||
@@ -3788,8 +3802,6 @@ skip_args_processing:
 	}
 	selected_langid = get_language_id(selected_locale);
 
-	// Set the Windows version
-	GetWindowsVersion(&WindowsVersion);
 	// Force a version if specified as parameter, but without allowing folks running
 	// a version of Windows we no longer support to use the option as a bypass!
 	if (WindowsVersion.Version > WINDOWS_7 && forced_windows_version != 0)
