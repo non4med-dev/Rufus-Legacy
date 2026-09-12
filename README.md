@@ -8,7 +8,7 @@ The original project can be found [under this link.](https://github.com/pbatard/
 Important Notes
 ---------------
 
-Release v1.1 has been pulled down because of an issue with Windows 2000 - Windows Vista not having wimgapi.dll. I will look into it tommorow. Sorry!
+RC2 has been temporarilly pulled down to fix a bunch of Windows To Go related bugs on NT5.
 
 Features
 --------
@@ -56,28 +56,25 @@ Future Plans
 
 More about the project
 ----------------------
-Rufus-Legacy is based on Rufus 4.7.2231 (released April 9, 2025). It's the last version of Rufus to compile with Visual Studio 2022 17.6 and use a non-WIMlib base, which older operating systems don't benefit from.
+Rufus-Legacy is based on Rufus 4.7.2231 (released April 9, 2025).<br>
+This is the last release to use a non-wimlib base, which I found to be the better choice for older systems.<br>
 
-Newer releases of Rufus-Legacy will slowly and selectively implement features found in newer versions of Rufus, keeping 4.7 as a base.
+The general idea was never to 'just get it running', but rather to actually adapt the existing features of Rufus to work natively on anything W2000 and up.<br>
 
-Over time I'll attempt to make this project more independent from the upstream main branch so it can focus entirely on features older OSes can actually benefit from.
-
-AI Disclaimer
--------------
-
-Some parts of the code; i.e. the API implementations winxp.c win2k.c as well as win2k_imports.asm have been developed with the use of AI and underwent numerous revisions.<br>
-Certain parts of the code that have been written with the help of AI are marked with comments ending with (port-AI)
-I have used AI to look over parts of my code, improve, safecheck and optimize them, to ensure the stability of the custom-written code.
-
-I am an amateur, and a beginner.
-My main and only objective is delivering actually working code.
+Future releases of Rufus-Legacy will mostly focus on selectively implementing upstream security and feature commits, as well as fixing bugs and issues.<br>
 
 Compilation
 -----------
 
-Use Visual Studio 2022 and then invoke the `.sln` 
+Use Visual Studio 2022 and then invoke the `.sln` <br>
+Starting with Release 1.0, x86 builds will be prioritized;<br>
+x64 compilations may fail, and/or have issues.
 
 MinGW compiling isn't supported for this fork.
+
+#### For Anyone Reading The Code
+**MOST** changes marked with comments ending with "(port)",<br>
+or contain full feature names like "Windows To Go".<br>
 
 #### Visual Studio
 
@@ -89,3 +86,12 @@ this applies regardless of whether you are an individual or a corporate user.
 Rufus is 100% [Free Software](https://www.gnu.org/philosophy/free-sw) ([GPL v3](https://www.gnu.org/licenses/gpl-3.0))
 All credits for the original project go to [Pete Batard](https://github.com/pbatard) and all other contributors.
 Rufus-Legacy is an unofficial fork and is not affiliated with, endorsed by, or otherwise associated with the upstream Rufus project.
+
+AI Use
+-------
+
+Some parts of the code; i.e. the API implementations winxp.c win2k.c as well as win2k_imports.asm have been developed with the use of AI, and underwent numerous revisions.<br>
+Certain parts of the code that have been written entirely by AI are marked with comments ending with (port-AI).<br>
+I have used AI to look over my code, improve, safecheck and optimize parts of it, to ensure that what is released actually works.<br>
+
+My main and only objective is delivering actually working code.
