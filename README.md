@@ -19,7 +19,7 @@ Features
 - Create bootable drives from bootable ISOs (Windows, Linux, etc.)<br>
 - Create bootable drives from bootable disk images, including compressed ones<br>
 - Create [Windows To Go](https://en.wikipedia.org/wiki/Windows_To_Go) drives<br>
-- Create VHD/DD (W2000+), VHDX (W8+) and FFU (W10 1709+) images of an existing drive<br>
+- Create VHD/DD, VHDX and FFU images of an existing drive<br>
 - Create persistent Linux partitions<br>
 - Compute MD5, SHA-1, SHA-256 and SHA-512 checksums of the selected image<br>
 - Perform runtime validation of UEFI bootable media<br>
@@ -48,6 +48,11 @@ Changes
 - autorun.inf / .ico files disabled
 - Original code paths kept for natively supported systems<br>
 -> (OS-specific fallbacks were prefered over replacing original code)
+
+Unavailable Features
+--------------------
+Windows Vista and 7 -> VDS, VHDX and FFU, ReFS
+Windows 2000 and XP -> DBX Update Checks, Fido
 
 Future Plans
 ------------
