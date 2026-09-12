@@ -26,7 +26,7 @@ Features
 - Perform bad blocks checks, including detection of "fake" flash drivesbr>
 - Download official Microsoft Windows 8, Windows 10 or Windows 11 retail ISOs<br>
 - Download UEFI Shell ISOs<br>
-&nbsp;&nbsp;&nbsp;-> Windows 7 requires [Powershell 7.2](https://github.com/PowerShell/PowerShell/releases/tag/v7.2.24) to be installed for downloading to work<br>
+-> Windows 7 requires [Powershell 7.2](https://github.com/PowerShell/PowerShell/releases/tag/v7.2.24) to be installed for downloading to work<br>
 - Modern and familiar UI, with 38 languages natively supported
 - Small footprint. No installation required.
 - Portable. Secure Boot compatible.
@@ -47,7 +47,7 @@ Changes
 - Application closing has been optimized
 - autorun.inf / .ico files disabled
 - Original code paths kept for natively supported systems<br>
-&nbsp;&nbsp;&nbsp;-> (OS-specific fallbacks were prefered over replacing original code)
+-> (OS-specific fallbacks were prefered over replacing original code)
 
 Future Plans
 ------------
