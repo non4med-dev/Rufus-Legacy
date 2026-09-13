@@ -3,7 +3,7 @@
 
 ![Rufus-Legacy-Banner](https://raw.githubusercontent.com/non4med-dev/Rufus-Legacy/master/res/icons/Banner.png)
 
-The original project can be found [under this link.](https://github.com/pbatard/
+The original project can be found [under this link.](https://github.com/pbatard/)
 
 Features
 --------
