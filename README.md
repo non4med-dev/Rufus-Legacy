@@ -5,6 +5,10 @@
 
 The original project can be found [under this link.](https://github.com/pbatard/)
 
+Info
+----
+I'm currently working on porting Windows 8.1's wimgapi to Windows 2000, which would allow for actual WIM mounting and ESD support. DBX paths have been updated and will be released once the backport is finished, implemented and the experimental code cleaned up. That will be released as "Rufus-Legacy".
+
 Features
 --------
 
